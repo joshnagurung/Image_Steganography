@@ -1,0 +1,424 @@
+{% extends 'base.html' %}
+
+{% block title %}QR Code Generator - Inkognito{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+        <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r from-green-500 via-blue-500 to-purple-600 flex items-center justify-center mb-6 animate-pulse">
+            <i data-lucide="qr-code" class="w-10 h-10 text-white"></i>
+        </div>
+        
+        <h1 class="text-4xl lg:text-5xl font-bold mb-4 text-gradient text-glow">
+            QR Code Generator
+        </h1>
+        
+        <p class="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+            Transform any text into a beautiful, scannable QR code instantly. Perfect for sharing links, contact info, or any data securely.
+        </p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Generator Section -->
+        <div class="space-y-6">
+            <!-- Input Form -->
+            <div class="ultra-glass rounded-2xl p-8">
+                <div class="flex items-center space-x-3 mb-6">
+                    <i data-lucide="edit-3" class="w-6 h-6 text-green-400"></i>
+                    <h2 class="text-2xl font-semibold text-white">Create QR Code</h2>
+                </div>
+                
+                <form method="post" class="space-y-6" id="qrForm">
+                    {% csrf_token %}
+                    
+                    <!-- Text Input -->
+                    <div class="space-y-2">
+                        <label for="qr_text" class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                            <i data-lucide="type" class="w-4 h-4"></i>
+                            <span>Enter Your Text</span>
+                        </label>
+                        <div class="relative">
+                            <textarea 
+                                name="qr_text" 
+                                id="qr_text"
+                                rows="4" 
+                                class="w-full px-4 py-3 bg-black bg-opacity-20 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent backdrop-blur-sm resize-none"
+                                placeholder="Enter text, URL, email, phone number, or any data you want to encode..."
+                                required
+                                maxlength="2000"
+                            >{{ qr_text|default_if_none:"" }}</textarea>
+                            <div class="absolute bottom-3 right-3 text-xs text-gray-400" id="charCount">
+                                0 / 2000
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Templates -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                            <i data-lucide="zap" class="w-4 h-4"></i>
+                            <span>Quick Templates</span>
+                        </label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <button type="button" class="btn-premium btn-secondary text-sm" onclick="setTemplate('url')">
+                                <i data-lucide="link" class="w-4 h-4 mr-2"></i>
+                                Website URL
+                            </button>
+                            <button type="button" class="btn-premium btn-secondary text-sm" onclick="setTemplate('email')">
+                                <i data-lucide="mail" class="w-4 h-4 mr-2"></i>
+                                Email
+                            </button>
+                            <button type="button" class="btn-premium btn-secondary text-sm" onclick="setTemplate('phone')">
+                                <i data-lucide="phone" class="w-4 h-4 mr-2"></i>
+                                Phone
+                            </button>
+                            <button type="button" class="btn-premium btn-secondary text-sm" onclick="setTemplate('wifi')">
+                                <i data-lucide="wifi" class="w-4 h-4 mr-2"></i>
+                                WiFi
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Generate Button -->
+                    <button type="submit" class="btn-premium btn-primary w-full flex items-center justify-center space-x-2" id="generateBtn">
+                        <i data-lucide="qr-code" class="w-5 h-5"></i>
+                        <span>Generate QR Code</span>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Features Info -->
+            <div class="ultra-glass rounded-2xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <i data-lucide="star" class="w-6 h-6 text-yellow-400"></i>
+                    <h3 class="text-lg font-semibold text-white">Features</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-3 text-sm text-gray-300">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
+                        <span>High Resolution</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
+                        <span>Instant Generation</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
+                        <span>Multiple Formats</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="check" class="w-4 h-4 text-green-400"></i>
+                        <span>Error Correction</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- QR Code Display Section -->
+        <div class="space-y-6">
+            {% if qr_img_base64 %}
+                <!-- QR Code Display -->
+                <div class="premium-glass rounded-2xl p-8 text-center">
+                    <div class="flex items-center justify-center space-x-3 mb-6">
+                        <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                        <h3 class="text-2xl font-semibold text-white">Your QR Code</h3>
+                    </div>
+                    
+                    <!-- QR Code Image -->
+                    <div class="bg-white rounded-2xl p-8 mb-6 inline-block shadow-2xl">
+                        <img src="{{ qr_img_base64 }}" alt="Generated QR Code" class="max-w-full h-auto" id="qrImage" />
+                    </div>
+                    
+                    <!-- Encoded Text Display -->
+                    <div class="bg-black bg-opacity-30 rounded-xl p-4 mb-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm text-gray-400">Encoded Text:</span>
+                            <button class="text-xs text-blue-400 hover:text-blue-300" onclick="copyToClipboard('{{ qr_text|escapejs }}')">
+                                <i data-lucide="copy" class="w-3 h-3 inline mr-1"></i>Copy
+                            </button>
+                        </div>
+                        <div class="text-white font-mono text-sm break-all">{{ qr_text }}</div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <button class="btn-premium btn-primary flex items-center justify-center space-x-2" onclick="downloadQR()">
+                            <i data-lucide="download" class="w-4 h-4"></i>
+                            <span>Download</span>
+                        </button>
+                        <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="shareQR()">
+                            <i data-lucide="share-2" class="w-4 h-4"></i>
+                            <span>Share</span>
+                        </button>
+                    </div>
+                </div>
+            {% else %}
+                <!-- Placeholder -->
+                <div class="ultra-glass rounded-2xl p-8 text-center">
+                    <div class="w-32 h-32 mx-auto rounded-2xl bg-gradient-to-r from-gray-600 to-gray-700 flex items-center justify-center mb-6 opacity-50">
+                        <i data-lucide="qr-code" class="w-16 h-16 text-gray-400"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-gray-400 mb-2">QR Code Preview</h3>
+                    <p class="text-gray-500 text-sm">Enter text and click generate to see your QR code here</p>
+                </div>
+            {% endif %}
+
+            <!-- Instructions -->
+            <div class="ultra-glass rounded-2xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <i data-lucide="info" class="w-6 h-6 text-blue-400"></i>
+                    <h3 class="text-lg font-semibold text-white">How to Use</h3>
+                </div>
+                <div class="space-y-3 text-sm text-gray-300">
+                    <div class="flex items-start space-x-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0">1</span>
+                        <span>Enter your text, URL, or data in the input field</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0">2</span>
+                        <span>Use quick templates for common formats</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0">3</span>
+                        <span>Click generate to create your QR code</span>
+                    </div>
+                    <div class="flex items-start space-x-2">
+                        <span class="w-5 h-5 rounded-full bg-blue-500 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0">4</span>
+                        <span>Download or share your QR code</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Supported Formats -->
+            <div class="ultra-glass rounded-2xl p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <i data-lucide="layers" class="w-6 h-6 text-purple-400"></i>
+                    <h3 class="text-lg font-semibold text-white">Supported Formats</h3>
+                </div>
+                <div class="grid grid-cols-2 gap-2 text-sm text-gray-300">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="link" class="w-4 h-4 text-blue-400"></i>
+                        <span>URLs & Links</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="mail" class="w-4 h-4 text-green-400"></i>
+                        <span>Email Addresses</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="phone" class="w-4 h-4 text-yellow-400"></i>
+                        <span>Phone Numbers</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="wifi" class="w-4 h-4 text-purple-400"></i>
+                        <span>WiFi Credentials</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="map-pin" class="w-4 h-4 text-red-400"></i>
+                        <span>GPS Coordinates</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="type" class="w-4 h-4 text-gray-400"></i>
+                        <span>Plain Text</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent QR Codes (if you want to add this feature) -->
+    <div class="mt-12">
+        <div class="ultra-glass rounded-2xl p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center space-x-3">
+                    <i data-lucide="history" class="w-6 h-6 text-gray-400"></i>
+                    <h3 class="text-xl font-semibold text-white">Quick Actions</h3>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="clearForm()">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    <span>Clear Form</span>
+                </button>
+                <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="generateRandom()">
+                    <i data-lucide="shuffle" class="w-4 h-4"></i>
+                    <span>Random Text</span>
+                </button>
+                <a href="{% url 'home' %}" class="btn-premium btn-secondary flex items-center justify-center space-x-2">
+                    <i data-lucide="home" class="w-4 h-4"></i>
+                    <span>Back to Home</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Character counter
+    const textArea = document.getElementById('qr_text');
+    const charCount = document.getElementById('charCount');
+    
+    function updateCharCount() {
+        const count = textArea.value.length;
+        charCount.textContent = `${count} / 2000`;
+        charCount.style.color = count > 1800 ? '#ef4444' : '#9ca3af';
+    }
+    
+    textArea.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initial count
+
+    // Auto-resize textarea
+    textArea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 150) + 'px';
+    });
+
+    // Quick templates
+    function setTemplate(type) {
+        const templates = {
+            url: 'https://example.com',
+            email: 'mailto:contact@example.com?subject=Hello&body=Your message here',
+            phone: 'tel:+1234567890',
+            wifi: 'WIFI:T:WPA;S:NetworkName;P:Password;H:false;;'
+        };
+        
+        textArea.value = templates[type];
+        textArea.focus();
+        updateCharCount();
+        
+        // Auto-resize after setting template
+        textArea.style.height = 'auto';
+        textArea.style.height = Math.min(textArea.scrollHeight, 150) + 'px';
+    }
+
+    // Form submission with loading state
+    document.getElementById('qrForm').addEventListener('submit', function(e) {
+        const generateBtn = document.getElementById('generateBtn');
+        const originalContent = generateBtn.innerHTML;
+        
+        generateBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i>Generating...';
+        generateBtn.disabled = true;
+        
+        // Re-enable button after a delay (in case of errors)
+        setTimeout(() => {
+            generateBtn.innerHTML = originalContent;
+            generateBtn.disabled = false;
+            lucide.createIcons();
+        }, 5000);
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            // Show success feedback
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-3 h-3 inline mr-1"></i>Copied!';
+            button.classList.add('text-green-400');
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.classList.remove('text-green-400');
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    // Download QR code
+    function downloadQR() {
+        const qrImage = document.getElementById('qrImage');
+        if (qrImage) {
+            const link = document.createElement('a');
+            link.download = 'qr-code.png';
+            link.href = qrImage.src;
+            link.click();
+        }
+    }
+
+    // Share QR code
+    function shareQR() {
+        const qrImage = document.getElementById('qrImage');
+        if (qrImage && navigator.share) {
+            // Convert base64 to blob for sharing
+            fetch(qrImage.src)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], 'qr-code.png', { type: 'image/png' });
+                    navigator.share({
+                        title: 'QR Code',
+                        text: 'Check out this QR code!',
+                        files: [file]
+                    });
+                })
+                .catch(err => {
+                    // Fallback: copy image URL
+                    copyToClipboard(qrImage.src);
+                });
+        } else {
+            // Fallback: copy image URL
+            copyToClipboard(qrImage.src);
+        }
+    }
+
+    // Clear form
+    function clearForm() {
+        textArea.value = '';
+        updateCharCount();
+        textArea.style.height = 'auto';
+        textArea.focus();
+    }
+
+    // Generate random text
+    function generateRandom() {
+        const randomTexts = [
+            'Hello, World!',
+            'https://github.com',
+            'Welcome to the future of QR codes!',
+            'Scan me for a surprise!',
+            'Made with Inkognito QR Generator',
+            'https://www.example.com/awesome-content',
+            'Contact us: info@example.com',
+            'Follow us on social media!'
+        ];
+        
+        const randomText = randomTexts[Math.floor(Math.random() * randomTexts.length)];
+        textArea.value = randomText;
+        updateCharCount();
+        textArea.focus();
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + Enter to generate
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('qrForm').submit();
+        }
+        
+        // Ctrl/Cmd + K to clear
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            clearForm();
+        }
+    });
+
+    // Auto-focus on text area when page loads
+    window.addEventListener('load', function() {
+        textArea.focus();
+    });
+
+    {% if qr_img_base64 %}
+        // Smooth scroll to QR code when generated
+        setTimeout(() => {
+            document.querySelector('.premium-glass').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }, 100);
+    {% endif %}
+</script>
+{% endblock %}

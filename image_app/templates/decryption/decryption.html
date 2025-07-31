@@ -1,0 +1,522 @@
+{% extends 'base.html' %}
+{% block title %}Decrypt Image | Image Steganography{% endblock %}
+
+{% block content %}
+<style>
+    /* Decryption page specific styles */
+    .decrypt-container {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 25px 80px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .file-upload-area {
+        background: rgba(255, 255, 255, 0.03);
+        backdrop-filter: blur(20px);
+        border: 2px dashed rgba(79, 172, 254, 0.3);
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .file-upload-area::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(79, 172, 254, 0.1), transparent);
+        transition: left 0.6s;
+    }
+
+    .file-upload-area:hover::before {
+        left: 100%;
+    }
+
+    .file-upload-area.dragover {
+        border-color: rgba(79, 172, 254, 0.8);
+        background: rgba(79, 172, 254, 0.1);
+        transform: scale(1.02);
+    }
+
+    .file-upload-area:hover {
+        border-color: rgba(79, 172, 254, 0.6);
+        background: rgba(79, 172, 254, 0.05);
+        transform: translateY(-2px);
+    }
+
+    .decrypt-button {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: relative;
+        overflow: hidden;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .decrypt-button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+
+    .decrypt-button:hover::before {
+        left: 100%;
+    }
+
+    .decrypt-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.4);
+    }
+
+    .decrypt-button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+    }
+
+    .result-container {
+        background: rgba(34, 197, 94, 0.1);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        animation: slideInUp 0.6s ease-out;
+    }
+
+    @keyframes slideInUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .loading-spinner {
+        display: none;
+        width: 24px;
+        height: 24px;
+        border: 3px solid rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        border-top-color: #ffffff;
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .file-info {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        animation: fadeInScale 0.4s ease-out;
+    }
+
+    @keyframes fadeInScale {
+        from {
+            opacity: 0;
+            transform: scale(0.9);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1);
+        }
+    }
+
+    .floating-decrypt-bg {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(2px);
+        animation: floatDecrypt 10s ease-in-out infinite;
+    }
+
+    @keyframes floatDecrypt {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.3;
+        }
+        50% {
+            transform: translateY(-20px) scale(1.1);
+            opacity: 0.6;
+        }
+    }
+
+    .bg-decrypt-1 {
+        width: 100px;
+        height: 100px;
+        top: 20%;
+        left: 10%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        animation-delay: 0s;
+    }
+
+    .bg-decrypt-2 {
+        width: 80px;
+        height: 80px;
+        top: 70%;
+        right: 15%;
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        animation-delay: 3s;
+    }
+
+    .progress-bar {
+        width: 0%;
+        height: 4px;
+        background: linear-gradient(90deg, #4facfe, #00f2fe);
+        transition: width 0.3s ease;
+        border-radius: 2px;
+    }
+
+    .decrypt-icon {
+        animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+        0%, 100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+    }
+
+    .text-gradient-decrypt {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .success-checkmark {
+        animation: checkmarkSlide 0.6s ease-out;
+    }
+
+    @keyframes checkmarkSlide {
+        0% {
+            transform: scale(0) rotate(-45deg);
+            opacity: 0;
+        }
+        50% {
+            transform: scale(1.2) rotate(-45deg);
+            opacity: 1;
+        }
+        100% {
+            transform: scale(1) rotate(0deg);
+            opacity: 1;
+        }
+    }
+</style>
+
+<!-- Floating Background Elements -->
+<div class="floating-decrypt-bg bg-decrypt-1"></div>
+<div class="floating-decrypt-bg bg-decrypt-2"></div>
+
+<div class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 relative">
+    <div class="w-full max-w-2xl">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="w-24 h-24 mx-auto mb-6 decrypt-container rounded-full flex items-center justify-center">
+                <div class="w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                    <i data-lucide="unlock" class="w-8 h-8 text-white decrypt-icon"></i>
+                </div>
+            </div>
+            <h1 class="text-5xl font-bold mb-4">
+                <span class="text-gradient-decrypt">Decrypt</span> 
+                <span class="text-white">Your Image</span>
+            </h1>
+            <p class="text-xl text-gray-300 max-w-2xl mx-auto">
+                Upload your steganography-encoded image to reveal the hidden message within. 
+                Our advanced algorithms will extract your secret data safely and securely.
+            </p>
+        </div>
+
+        <!-- Main Decryption Form -->
+        <div class="decrypt-container rounded-3xl p-8 md:p-12 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5"></div>
+            
+            <form method="post" action="{% url 'decryption' %}" enctype="multipart/form-data" id="decryptForm" class="relative z-10">
+                {% csrf_token %}
+                
+                <!-- File Upload Area -->
+                <div class="mb-8">
+                    <label class="block text-lg font-semibold text-white mb-4 flex items-center">
+                        <i data-lucide="image" class="w-5 h-5 mr-2 text-blue-400"></i>
+                        Choose Encrypted Image
+                    </label>
+                    
+                    <div class="file-upload-area rounded-2xl p-8 text-center cursor-pointer" id="fileUploadArea">
+                        <input type="file" id="image" name="image" required accept="image/*" class="hidden" />
+                        
+                        <div id="uploadPrompt">
+                            <i data-lucide="upload-cloud" class="w-16 h-16 text-blue-400 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-semibold text-white mb-2">Drop your image here</h3>
+                            <p class="text-gray-400 mb-4">or click to browse files</p>
+                            <div class="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-xl text-blue-300 font-medium">
+                                <i data-lucide="folder-open" class="w-4 h-4 mr-2"></i>
+                                Browse Files
+                            </div>
+                        </div>
+
+                        <div id="fileInfo" class="file-info rounded-xl p-4 hidden">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center">
+                                    <i data-lucide="file-image" class="w-8 h-8 text-green-400 mr-3"></i>
+                                    <div>
+                                        <div class="text-white font-semibold" id="fileName"></div>
+                                        <div class="text-gray-400 text-sm" id="fileSize"></div>
+                                    </div>
+                                </div>
+                                <button type="button" id="removeFile" class="text-red-400 hover:text-red-300 transition-colors">
+                                    <i data-lucide="x" class="w-5 h-5"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="mb-6">
+                    <div class="bg-gray-700 rounded-full h-2 overflow-hidden">
+                        <div class="progress-bar" id="progressBar"></div>
+                    </div>
+                </div>
+
+                <!-- Decrypt Button -->
+                <button type="submit" id="decryptBtn" 
+                        class="w-full decrypt-button text-white font-bold py-4 px-8 rounded-2xl text-lg flex items-center justify-center space-x-3 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <i data-lucide="unlock" class="w-6 h-6"></i>
+                    <span id="buttonText">Decrypt Hidden Message</span>
+                    <div class="loading-spinner" id="loadingSpinner"></div>
+                </button>
+
+                <!-- Security Info -->
+                <div class="mt-6 flex items-center justify-center space-x-6 text-sm text-gray-400">
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-green-400"></i>
+                        <span>Secure Processing</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="eye-off" class="w-4 h-4 text-blue-400"></i>
+                        <span>Privacy Protected</span>
+                    </div>
+                    <div class="flex items-center space-x-2">
+                        <i data-lucide="zap" class="w-4 h-4 text-purple-400"></i>
+                        <span>Instant Results</span>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <!-- Results Section -->
+        {% if text %}
+        <div class="result-container rounded-3xl p-8 md:p-12 mt-8 relative overflow-hidden">
+            <div class="absolute inset-0 bg-gradient-to-r from-green-600/5 to-emerald-600/5"></div>
+            <div class="relative z-10">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-500 rounded-full flex items-center justify-center mr-4">
+                        <i data-lucide="check" class="w-6 h-6 text-white success-checkmark"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold text-white">Decryption Successful!</h3>
+                </div>
+                
+                <div class="bg-gray-800/50 rounded-2xl p-6 backdrop-blur-sm border border-gray-700">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-lg font-semibold text-green-400 flex items-center">
+                            <i data-lucide="message-square" class="w-5 h-5 mr-2"></i>
+                            Hidden Message
+                        </h4>
+                        <button onclick="copyToClipboard()" class="flex items-center space-x-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 rounded-lg text-blue-300 transition-colors">
+                            <i data-lucide="copy" class="w-4 h-4"></i>
+                            <span>Copy</span>
+                        </button>
+                    </div>
+                    <div class="bg-gray-900/50 rounded-xl p-4 border border-gray-600">
+                        <p class="text-gray-100 break-words leading-relaxed font-mono" id="decryptedText">{{ text }}</p>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 mt-8">
+                    <button onclick="location.reload()" 
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                        <i data-lucide="refresh-cw" class="w-5 h-5"></i>
+                        <span>Decrypt Another</span>
+                    </button>
+                    <a href="{% url 'encryption' %}" 
+                       class="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-300 flex items-center justify-center space-x-2">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                        <span>Encrypt Message</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Help Section -->
+        <div class="mt-12 text-center">
+            <div class="decrypt-container rounded-2xl p-6">
+                <h4 class="text-lg font-semibold text-white mb-3 flex items-center justify-center">
+                    <i data-lucide="help-circle" class="w-5 h-5 mr-2 text-blue-400"></i>
+                    Need Help?
+                </h4>
+                <p class="text-gray-400 mb-4">
+                    Make sure your image was created using our encryption tool. Only images with hidden messages can be decrypted.
+                </p>
+                <div class="flex flex-wrap justify-center gap-4 text-sm">
+                    <a href="#" class="text-blue-400 hover:text-blue-300 transition-colors flex items-center space-x-1">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                        <span>Documentation</span>
+                    </a>
+                    <a href="#" class="text-purple-400 hover:text-purple-300 transition-colors flex items-center space-x-1">
+                        <i data-lucide="play-circle" class="w-4 h-4"></i>
+                        <span>Tutorial</span>
+                    </a>
+                    <a href="#" class="text-green-400 hover:text-green-300 transition-colors flex items-center space-x-1">
+                        <i data-lucide="mail" class="w-4 h-4"></i>
+                        <span>Support</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    const fileInput = document.getElementById('image');
+    const fileUploadArea = document.getElementById('fileUploadArea');
+    const uploadPrompt = document.getElementById('uploadPrompt');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+    const fileSize = document.getElementById('fileSize');
+    const removeFileBtn = document.getElementById('removeFile');
+    const decryptBtn = document.getElementById('decryptBtn');
+    const buttonText = document.getElementById('buttonText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const progressBar = document.getElementById('progressBar');
+    const decryptForm = document.getElementById('decryptForm');
+
+    // File upload handling
+    fileUploadArea.addEventListener('click', () => fileInput.click());
+    
+    fileUploadArea.addEventListener('dragover', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.add('dragover');
+    });
+
+    fileUploadArea.addEventListener('dragleave', () => {
+        fileUploadArea.classList.remove('dragover');
+    });
+
+    fileUploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        fileUploadArea.classList.remove('dragover');
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            handleFileSelect(files[0]);
+        }
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        if (e.target.files.length > 0) {
+            handleFileSelect(e.target.files[0]);
+        }
+    });
+
+    function handleFileSelect(file) {
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file.');
+            return;
+        }
+
+        fileName.textContent = file.name;
+        fileSize.textContent = formatFileSize(file.size);
+        
+        uploadPrompt.classList.add('hidden');
+        fileInfo.classList.remove('hidden');
+        
+        // Animate progress bar
+        progressBar.style.width = '100%';
+        setTimeout(() => {
+            progressBar.style.width = '0%';
+        }, 1000);
+    }
+
+    removeFileBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        fileInput.value = '';
+        uploadPrompt.classList.remove('hidden');
+        fileInfo.classList.add('hidden');
+        progressBar.style.width = '0%';
+    });
+
+    // Form submission handling
+    decryptForm.addEventListener('submit', (e) => {
+        if (!fileInput.files.length) {
+            e.preventDefault();
+            alert('Please select an image file first.');
+            return;
+        }
+
+        // Show loading state
+        decryptBtn.disabled = true;
+        buttonText.textContent = 'Decrypting...';
+        loadingSpinner.style.display = 'block';
+        
+        // Animate progress bar
+        progressBar.style.width = '100%';
+    });
+
+    // Utility functions
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    function copyToClipboard() {
+        const text = document.getElementById('decryptedText').textContent;
+        navigator.clipboard.writeText(text).then(() => {
+            // Show success feedback
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-4 h-4"></i><span>Copied!</span>';
+            lucide.createIcons();
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    // Add smooth animations on page load
+    window.addEventListener('load', () => {
+        const elements = document.querySelectorAll('.decrypt-container, .file-upload-area');
+        elements.forEach((el, index) => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                el.style.transition = 'all 0.6s ease-out';
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    });
+</script>
+{% endblock %}

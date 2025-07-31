@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Image Steganography{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+        }
+
+        /* Advanced Background System */
+        .cosmic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--dark-gradient);
+            z-index: -1;
+        }
+
+        .cosmic-bg::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+            animation: cosmicPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes cosmicPulse {
+            0% { opacity: 0.5; transform: scale(1); }
+            100% { opacity: 0.8; transform: scale(1.1); }
+        }
+
+        /* Advanced Particle System */
+        .particle-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            animation: particleFloat 20s infinite linear;
+        }
+
+        .particle.large {
+            width: 4px;
+            height: 4px;
+            background: rgba(120, 219, 255, 0.6);
+            animation: particleFloat 25s infinite linear;
+        }
+
+        .particle.accent {
+            width: 3px;
+            height: 3px;
+            background: rgba(255, 119, 198, 0.7);
+            animation: particleFloat 15s infinite linear;
+        }
+
+        @keyframes particleFloat {
+            0% {
+                transform: translateY(100vh) translateX(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        /* Ultra-Modern Glass Morphism */
+        .ultra-glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .premium-glass {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.05);
+        }
+
+        /* Advanced Navigation */
+        .nav-container {
+            position: relative;
+            z-index: 1000;
+        }
+
+        .nav-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(30px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-glow {
+            position: relative;
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            filter: drop-shadow(0 0 20px rgba(102, 126, 234, 0.5));
+        }
+
+        .nav-link-premium {
+            position: relative;
+            padding: 12px 24px;
+            border-radius: 12px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .nav-link-premium::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: var(--accent-gradient);
+            transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: -1;
+        }
+
+        .nav-link-premium:hover::before {
+            left: 0;
+        }
+
+        .nav-link-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        }
+
+        /* Floating Action Elements */
+        .floating-orb {
+            position: absolute;
+            border-radius: 50%;
+            background: var(--accent-gradient);
+            filter: blur(1px);
+            animation: orbFloat 6s ease-in-out infinite;
+        }
+
+        .orb-1 {
+            width: 60px;
+            height: 60px;
+            top: 10%;
+            left: 5%;
+            animation-delay: 0s;
+        }
+
+        .orb-2 {
+            width: 40px;
+            height: 40px;
+            top: 60%;
+            right: 10%;
+            animation-delay: 2s;
+            background: var(--secondary-gradient);
+        }
+
+        .orb-3 {
+            width: 80px;
+            height: 80px;
+            bottom: 20%;
+            left: 15%;
+            animation-delay: 4s;
+            background: var(--primary-gradient);
+        }
+
+        @keyframes orbFloat {
+            0%, 100% {
+                transform: translateY(0px) scale(1);
+                opacity: 0.7;
+            }
+            50% {
+                transform: translateY(-20px) scale(1.1);
+                opacity: 0.9;
+            }
+        }
+
+        /* Premium Content Area */
+        .content-wrapper {
+            position: relative;
+            z-index: 10;
+            min-height: calc(100vh - 200px);
+        }
+
+        .content-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            box-shadow: 
+                0 25px 80px rgba(0, 0, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .content-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 
+                0 35px 100px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        /* Advanced Button Styles */
+        .btn-premium {
+            position: relative;
+            padding: 16px 32px;
+            border-radius: 16px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            border: none;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            color: white;
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-3px);
+        }
+
+        /* Scroll Progress */
+        .scroll-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 4px;
+            background: var(--accent-gradient);
+            z-index: 9999;
+            transition: width 0.1s ease;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.8);
+        }
+
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .floating-orb {
+                display: none;
+            }
+            
+            .particle {
+                display: none;
+            }
+        }
+
+        /* Advanced Typography */
+        .text-gradient {
+            background: var(--primary-gradient);
+            background-clip: text;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .text-glow {
+            text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+        }
+
+        
+    </style>
+</head>
+<body>
+
+    <!-- Cosmic Background -->
+    <div class="cosmic-bg"></div>
+
+    <!-- Floating Orbs -->
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+
+    <!-- Advanced Particle System -->
+    <div class="particle-container" id="particleContainer"></div>
+
+    <!-- Scroll Progress -->
+    <div class="scroll-progress" id="scrollProgress"></div>
+
+    <!-- Ultra-Premium Navigation -->
+    <nav class="nav-container sticky top-0">
+        <div class="max-w-7xl mx-auto px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                <div class="flex items-center space-x-8">
+                    <a href="{% url 'home' %}" class="flex items-center space-x-3 group">
+                        <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                            <i data-lucide="shield-check" class="w-6 h-6 text-white"></i>
+                        </div>
+                        <span class="text-2xl font-bold logo-glow">Inkognito</span>
+                    </a>
+                    
+                    <div class="hidden lg:flex space-x-2">
+                        <a href="{% url 'home' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="home" class="w-4 h-4 inline mr-2"></i>Home
+                        </a>
+                        <a href="{% url 'about' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="info" class="w-4 h-4 inline mr-2"></i>About
+                        </a>
+                        <a href="{% url 'generate_qr' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="qr-code" class="w-4 h-4 inline mr-2"></i>QR code Generator
+                        </a>
+                        <a href="{% url 'generate_qr_enc' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="lock" class="w-4 h-4 inline mr-2"></i>QR Encryption
+                        </a>
+                        <a href="{% url 'decrypt_qr' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="unlock" class="w-4 h-4 inline mr-2"></i>QR Decryption
+                        </a>
+                        <a href="{% url 'logout' %}" class="nav-link-premium text-white hover:text-white">
+                            <i data-lucide="log-out" class="w-4 h-4 inline mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Mobile Menu Button -->
+                <button class="lg:hidden ultra-glass rounded-xl p-3 text-white" id="mobileMenuBtn">
+                    <i data-lucide="menu" class="w-6 h-6"></i>
+                </button>
+            </div>
+            
+            <!-- Mobile Menu -->
+            <div class="lg:hidden overflow-hidden transition-all duration-300 max-h-0" id="mobileMenu">
+                <div class="premium-glass rounded-2xl mt-4 p-6 space-y-4">
+                    <a href="{% url 'about' %}" class="block text-white hover:text-blue-300 transition-colors p-3 rounded-xl hover:bg-white hover:bg-opacity-10">
+                        <i data-lucide="info" class="w-4 h-4 inline mr-3"></i>About
+                    </a>
+
+                    <a href="{% url 'logout' %}" class="block text-white hover:text-red-300 transition-colors p-3 rounded-xl hover:bg-white hover:bg-opacity-10">
+                        <i data-lucide="log-out" class="w-4 h-4 inline mr-3"></i>Logout
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Premium Content Area -->
+    <main class="content-wrapper px-6 py-12">
+        <div class="max-w-7xl mx-auto">
+            <div class="content-card p-8 lg:p-12">
+                {% block content %}
+                <!-- Default Premium Content -->
+                <div class="text-center py-20">
+                    <div class="mb-12">
+                        <div class="w-32 h-32 mx-auto rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 flex items-center justify-center mb-8 animate-pulse">
+                            <i data-lucide="image" class="w-16 h-16 text-white"></i>
+                        </div>
+                    </div>
+                    
+                    <h1 class="text-6xl lg:text-7xl font-bold mb-8 text-gradient text-glow">
+                        Image Steganography
+                    </h1>
+                    
+                    <p class="text-xl lg:text-2xl text-gray-300 max-w-4xl mx-auto leading-relaxed mb-12">
+                        Experience the future of secure communication. Hide your most sensitive data in plain sight with our cutting-edge steganography technology.
+                    </p>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-20">
+                        <div class="ultra-glass rounded-2xl p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <i data-lucide="shield" class="w-12 h-12 text-blue-400 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-semibold text-white mb-2">Military-Grade Security</h3>
+                            <p class="text-gray-400">Advanced encryption algorithms protect your data</p>
+                        </div>
+                        <div class="ultra-glass rounded-2xl p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <i data-lucide="zap" class="w-12 h-12 text-purple-400 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-semibold text-white mb-2">Lightning Fast</h3>
+                            <p class="text-gray-400">Process images in milliseconds with AI acceleration</p>
+                        </div>
+                        <div class="ultra-glass rounded-2xl p-8 text-center hover:scale-105 transition-transform duration-300">
+                            <i data-lucide="eye-off" class="w-12 h-12 text-pink-400 mx-auto mb-4"></i>
+                            <h3 class="text-xl font-semibold text-white mb-2">Invisible Protection</h3>
+                            <p class="text-gray-400">Completely undetectable to the human eye</p>
+                        </div>
+                    </div>
+                </div>
+                {% endblock %}
+            </div>
+        </div>
+    </main>
+
+    <!-- Ultra-Premium Footer -->
+    <footer class="premium-glass mt-20">
+        <div class="max-w-7xl mx-auto px-6 py-12">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="w-10 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gradient">Inkognito</span>
+                    </div>
+                    <p class="text-gray-400 text-lg leading-relaxed max-w-md">
+                        Revolutionizing digital security through advanced steganography. Your data, invisible and invincible.
+                    </p>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-6">Platform</h4>
+                    <div class="space-y-3">
+                        <a href="{% url 'home' %}" class="block text-gray-400 hover:text-white transition-colors">Home</a>
+                        <a href="{% url 'about' %}" class="block text-gray-400 hover:text-white transition-colors">About</a>
+                        <a href="{% url 'generate_qr' %}" class="block text-gray-400 hover:text-white transition-colors">QR code Generator</a>
+                        <a href="#" class="block text-gray-400 hover:text-white transition-colors"></a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-semibold text-white mb-6">Connect</h4>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 ultra-glass rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="github" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 ultra-glass rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="twitter" class="w-5 h-5"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 ultra-glass rounded-lg flex items-center justify-center text-gray-400 hover:text-white transition-colors">
+                            <i data-lucide="linkedin" class="w-5 h-5"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-700 pt-8 flex flex-col md:flex-row justify-between items-center">
+                <p class="text-gray-400 text-sm">
+                    &copy; {{ now|date:"Y" }} J&R. All rights reserved.
+                </p>
+                <div class="flex space-x-6 mt-4 md:mt-0">
+                    <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Privacy Policy</a>
+                    <a href="#" class="text-gray-400 hover:text-white text-sm transition-colors">Terms of Service</a>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Initialize Lucide icons
+        lucide.createIcons();
+
+        // Advanced Particle System
+        function createParticles() {
+            const container = document.getElementById('particleContainer');
+            const particleCount = window.innerWidth > 768 ? 50 : 20;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                const types = ['particle', 'particle large', 'particle accent'];
+                particle.className = types[Math.floor(Math.random() * types.length)];
+                
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+                
+                container.appendChild(particle);
+            }
+        }
+
+        // Page Loading
+        // window.addEventListener('load', () => {
+        //     const loader = document.getElementById('pageLoader');
+        //     setTimeout(() => {
+        //         loader.style.opacity = '0';
+        //         setTimeout(() => {
+        //             loader.style.display = 'none';
+        //         }, 500);
+        //     }, 1000);
+            
+        //     createParticles();
+        // });
+
+        // Mobile Menu
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        let isMenuOpen = false;
+
+        mobileMenuBtn.addEventListener('click', () => {
+            isMenuOpen = !isMenuOpen;
+            if (isMenuOpen) {
+                mobileMenu.style.maxHeight = '400px';
+                mobileMenuBtn.querySelector('i').setAttribute('data-lucide', 'x');
+            } else {
+                mobileMenu.style.maxHeight = '0';
+                mobileMenuBtn.querySelector('i').setAttribute('data-lucide', 'menu');
+            }
+            lucide.createIcons();
+        });
+
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const scrollProgress = document.getElementById('scrollProgress');
+            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
+            const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrollPercent = (scrollTop / scrollHeight) * 100;
+            scrollProgress.style.width = scrollPercent + '%';
+        });
+
+        // Advanced Parallax Effects
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            const orbs = document.querySelectorAll('.floating-orb');
+            
+            orbs.forEach((orb, index) => {
+                const speed = 0.1 + (index * 0.05);
+                orb.style.transform = `translateY(${scrolled * speed}px) scale(${1 + scrolled * 0.0001})`;
+            });
+        });
+
+        // Smooth Scrolling
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Advanced Hover Effects
+        document.querySelectorAll('.btn-premium').forEach(btn => {
+            btn.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-3px) scale(1.05)';
+            });
+            
+            btn.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe elements for animation
+        document.querySelectorAll('.content-card > *').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(30px)';
+            el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>

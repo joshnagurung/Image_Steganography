@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+
+{% block title %}Home | Image Steganography{% endblock %}
+
+{% block content %}
+<div class="min-h-screen relative overflow-hidden">
+  <!-- Hero Background Effects -->
+  <div class="absolute inset-0 pointer-events-none">
+    <div class="absolute top-10 left-10 w-40 h-40 bg-blue-500 bg-opacity-20 rounded-full blur-3xl animate-pulse"></div>
+    <div class="absolute top-1/3 right-20 w-32 h-32 bg-purple-500 bg-opacity-20 rounded-full blur-2xl animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute bottom-20 left-1/4 w-48 h-48 bg-pink-500 bg-opacity-15 rounded-full blur-3xl animate-pulse" style="animation-delay: 4s;"></div>
+    <div class="absolute bottom-10 right-10 w-36 h-36 bg-cyan-500 bg-opacity-20 rounded-full blur-2xl animate-pulse" style="animation-delay: 6s;"></div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    
+    <!-- Hero Section -->
+    <div class="text-center mb-20">
+      <div class="mb-8">
+        <div class="inline-flex items-center justify-center w-32 h-32 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 mb-8 relative">
+          <div class="w-28 h-28 bg-gray-900 rounded-full flex items-center justify-center">
+            <i data-lucide="shield-check" class="w-16 h-16 text-white"></i>
+          </div>
+          <div class="absolute inset-0 rounded-full bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 animate-spin" style="animation-duration: 8s;"></div>
+        </div>
+      </div>
+      
+      <h1 class="text-6xl lg:text-7xl font-bold mb-8 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent leading-tight">
+        Image Steganography
+      </h1>
+      
+      <p class="text-2xl lg:text-3xl text-gray-300 mb-6 max-w-4xl mx-auto leading-relaxed">
+        Hide your secrets in plain sight with military-grade encryption
+      </p>
+      
+      <p class="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed mb-12">
+        Transform ordinary images into secure vaults for your most sensitive data. Our advanced steganography technology makes your messages completely invisible while maintaining perfect image quality.
+      </p>
+
+      <!-- Action Buttons -->
+      <div class="flex flex-col sm:flex-row gap-6 justify-center items-center mb-16">
+        <a href="{% url 'encryption' %}" 
+           class="group relative overflow-hidden bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-6 px-12 rounded-2xl text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl min-w-[280px]">
+          <span class="relative z-10 flex items-center justify-center">
+            <i data-lucide="lock" class="w-6 h-6 mr-3"></i>
+            Encrypt Image
+          </span>
+          <div class="absolute inset-0 bg-gradient-to-r from-blue-400 to-purple-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+        </a>
+        
+        <a href="{% url 'decryption' %}" 
+           class="group relative overflow-hidden bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold py-6 px-12 rounded-2xl text-xl transition-all duration-300 transform hover:scale-105 hover:shadow-2xl min-w-[280px]">
+          <span class="relative z-10 flex items-center justify-center">
+            <i data-lucide="unlock" class="w-6 h-6 mr-3"></i>
+            Decrypt Image
+          </span>
+          <div class="absolute inset-0 bg-gradient-to-r from-green-400 to-emerald-400 opacity-0 group-hover:opacity-30 transition-opacity duration-300"></div>
+        </a>
+      </div>
+    </div>
+
+    <!-- Features Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-20">
+      
+      <!-- Feature 1 -->
+      <div class="premium-glass rounded-3xl p-8 text-center hover:scale-105 transition-all duration-500 group">
+        <div class="w-20 h-20 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+          <i data-lucide="eye-off" class="w-10 h-10 text-white"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-4">Invisible Protection</h3>
+        <p class="text-gray-400 leading-relaxed">Your data becomes completely invisible to the human eye while remaining perfectly accessible to you.</p>
+      </div>
+
+      <!-- Feature 2 -->
+      <div class="premium-glass rounded-3xl p-8 text-center hover:scale-105 transition-all duration-500 group">
+        <div class="w-20 h-20 bg-gradient-to-r from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+          <i data-lucide="shield" class="w-10 h-10 text-white"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-4">Military Grade</h3>
+        <p class="text-gray-400 leading-relaxed">AES-256 encryption ensures your secrets are protected with the same security used by governments.</p>
+      </div>
+
+      <!-- Feature 3 -->
+      <div class="premium-glass rounded-3xl p-8 text-center hover:scale-105 transition-all duration-500 group">
+        <div class="w-20 h-20 bg-gradient-to-r from-green-500 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+          <i data-lucide="zap" class="w-10 h-10 text-white"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-4">Lightning Fast</h3>
+        <p class="text-gray-400 leading-relaxed">Advanced algorithms process your images in milliseconds without compromising quality or security.</p>
+      </div>
+
+      <!-- Feature 4 -->
+      <div class="premium-glass rounded-3xl p-8 text-center hover:scale-105 transition-all duration-500 group">
+        <div class="w-20 h-20 bg-gradient-to-r from-orange-500 to-red-500 rounded-2xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-300">
+          <i data-lucide="download" class="w-10 h-10 text-white"></i>
+        </div>
+        <h3 class="text-2xl font-bold text-white mb-4">Universal Format</h3>
+        <p class="text-gray-400 leading-relaxed">Works with all major image formats and can be shared anywhere without raising suspicion.</p>
+      </div>
+    </div>
+
+    <!-- How It Works Section -->
+    <div class="mb-20">
+      <div class="text-center mb-16">
+        <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-cyan-400 to-blue-500 bg-clip-text text-transparent">
+          How It Works
+        </h2>
+        <p class="text-xl text-gray-400 max-w-3xl mx-auto">
+          Our advanced steganography process is simple yet incredibly secure
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-12">
+        
+        <!-- Step 1 -->
+        <div class="relative">
+          <div class="premium-glass rounded-3xl p-10 text-center hover:scale-105 transition-all duration-500">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+              <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                1
+              </div>
+            </div>
+            
+            <div class="w-24 h-24 bg-gradient-to-r from-blue-500 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-8 mt-4">
+              <i data-lucide="upload" class="w-12 h-12 text-white"></i>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-white mb-4">Upload & Encrypt</h3>
+            <p class="text-gray-400 leading-relaxed">
+              Choose your cover image and enter the secret message you want to hide. Our system encrypts your data with AES-256.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div class="relative">
+          <div class="premium-glass rounded-3xl p-10 text-center hover:scale-105 transition-all duration-500">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+              <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                2
+              </div>
+            </div>
+            
+            <div class="w-24 h-24 bg-gradient-to-r from-purple-500 to-pink-600 rounded-3xl flex items-center justify-center mx-auto mb-8 mt-4">
+              <i data-lucide="cpu" class="w-12 h-12 text-white"></i>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-white mb-4">Invisible Embedding</h3>
+            <p class="text-gray-400 leading-relaxed">
+              Advanced algorithms embed your encrypted data into the image's pixels using LSB steganography, making it completely undetectable.
+            </p>
+          </div>
+        </div>
+
+        <!-- Step 3 -->
+        <div class="relative">
+          <div class="premium-glass rounded-3xl p-10 text-center hover:scale-105 transition-all duration-500">
+            <div class="absolute -top-6 left-1/2 transform -translate-x-1/2">
+              <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-full flex items-center justify-center text-white font-bold text-xl">
+                3
+              </div>
+            </div>
+            
+            <div class="w-24 h-24 bg-gradient-to-r from-green-500 to-emerald-600 rounded-3xl flex items-center justify-center mx-auto mb-8 mt-4">
+              <i data-lucide="download" class="w-12 h-12 text-white"></i>
+            </div>
+            
+            <h3 class="text-2xl font-bold text-white mb-4">Secure Download</h3>
+            <p class="text-gray-400 leading-relaxed">
+              Download your steganographic image that looks identical to the original but contains your hidden encrypted message.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Section -->
+    <div class="premium-glass rounded-3xl p-12 mb-20">
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-8 text-center">
+        
+        <div class="group">
+          <div class="text-5xl font-bold bg-gradient-to-r from-blue-400 to-cyan-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
+            256-bit
+          </div>
+          <div class="text-gray-400 text-lg">AES Encryption</div>
+        </div>
+        
+        <div class="group">
+          <div class="text-5xl font-bold bg-gradient-to-r from-purple-400 to-pink-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
+            100%
+          </div>
+          <div class="text-gray-400 text-lg">Invisible to Eye</div>
+        </div>
+        
+        <div class="group">
+          <div class="text-5xl font-bold bg-gradient-to-r from-green-400 to-emerald-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
+            &lt;1s
+          </div>
+          <div class="text-gray-400 text-lg">Processing Time</div>
+        </div>
+        
+        <div class="group">
+          <div class="text-5xl font-bold bg-gradient-to-r from-orange-400 to-red-500 bg-clip-text text-transparent mb-2 group-hover:scale-110 transition-transform duration-300">
+            All
+          </div>
+          <div class="text-gray-400 text-lg">Image Formats</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Security Showcase -->
+    <div class="text-center mb-20">
+      <h2 class="text-5xl font-bold mb-6 bg-gradient-to-r from-red-400 to-pink-500 bg-clip-text text-transparent">
+        Unbreakable Security
+      </h2>
+      <p class="text-xl text-gray-400 max-w-3xl mx-auto mb-12">
+        Your data is protected by the same encryption standards used by banks and governments worldwide
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Security Feature 1 -->
+        <div class="ultra-glass rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+          <div class="w-16 h-16 bg-red-500 bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="key" class="w-8 h-8 text-red-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">AES-256 Encryption</h3>
+          <p class="text-gray-400 text-sm">The gold standard in encryption, trusted by governments and Fortune 500 companies.</p>
+        </div>
+
+        <!-- Security Feature 2 -->
+        <div class="ultra-glass rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+          <div class="w-16 h-16 bg-blue-500 bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="fingerprint" class="w-8 h-8 text-blue-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Zero Knowledge</h3>
+          <p class="text-gray-400 text-sm">We never see your data. All encryption happens locally on your device.</p>
+        </div>
+
+        <!-- Security Feature 3 -->
+        <div class="ultra-glass rounded-2xl p-8 hover:scale-105 transition-all duration-300">
+          <div class="w-16 h-16 bg-green-500 bg-opacity-20 rounded-xl flex items-center justify-center mx-auto mb-6">
+            <i data-lucide="shield-check" class="w-8 h-8 text-green-400"></i>
+          </div>
+          <h3 class="text-xl font-bold text-white mb-3">Quantum Resistant</h3>
+          <p class="text-gray-400 text-sm">Future-proof encryption that remains secure even against quantum computers.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Call to Action -->
+    <div class="text-center">
+      <div class="premium-glass rounded-3xl p-12 hover:scale-105 transition-all duration-500">
+        <h2 class="text-4xl font-bold text-white mb-6">Ready to Secure Your Data?</h2>
+        <p class="text-xl text-gray-400 mb-8 max-w-2xl mx-auto">
+          Join thousands of users who trust our platform to keep their sensitive information safe and invisible.
+        </p>
+        
+        <div class="flex flex-col sm:flex-row gap-6 justify-center">
+          <a href="{% url 'encryption' %}" 
+             class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl">
+            <i data-lucide="rocket" class="w-5 h-5 inline mr-2"></i>
+            Start Encrypting Now
+          </a>
+          
+          <a href="{% url 'about' %}" 
+             class="ultra-glass hover:bg-white hover:bg-opacity-10 text-white font-bold py-4 px-8 rounded-xl text-lg transition-all duration-300 transform hover:scale-105">
+            <i data-lucide="info" class="w-5 h-5 inline mr-2"></i>
+            Learn More
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  /* Custom animations for the home page */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+  
+  .floating {
+    animation: float 3s ease-in-out infinite;
+  }
+  
+  /* Gradient text animation */
+  @keyframes gradient-shift {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animated-gradient {
+    background-size: 200% 200%;
+    animation: gradient-shift 4s ease infinite;
+  }
+  
+  /* Hover glow effects */
+  .glow-on-hover:hover {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6);
+  }
+  
+  /* Stats counter animation */
+  .stat-number {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .stat-number:hover {
+    transform: scale(1.1);
+    filter: brightness(1.2);
+  }
+</style>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // Add floating animation to hero icon
+  document.addEventListener('DOMContentLoaded', function() {
+    const heroIcon = document.querySelector('.rounded-full.bg-gradient-to-r');
+    if (heroIcon) {
+      heroIcon.classList.add('floating');
+    }
+  });
+
+  // Intersection Observer for scroll animations
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe all feature cards and sections
+  document.querySelectorAll('.premium-glass, .ultra-glass').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)';
+    observer.observe(el);
+  });
+
+  // Add staggered animation delays
+  document.querySelectorAll('.premium-glass').forEach((el, index) => {
+    el.style.transitionDelay = `${index * 0.1}s`;
+  });
+
+  // Enhanced hover effects for action buttons
+  document.querySelectorAll('a[href]').forEach(link => {
+    link.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-3px) scale(1.05)';
+    });
+    
+    link.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+
+  // Parallax effect for background elements
+  window.addEventListener('scroll', () => {
+    const scrolled = window.pageYOffset;
+    const backgroundElements = document.querySelectorAll('.absolute.bg-opacity-20');
+    
+    backgroundElements.forEach((element, index) => {
+      const speed = 0.1 + (index * 0.05);
+      element.style.transform = `translateY(${scrolled * speed}px) scale(${1 + scrolled * 0.0001})`;
+    });
+  });
+
+  // Add click ripple effect to buttons
+  document.querySelectorAll('a, button').forEach(element => {
+    element.addEventListener('click', function(e) {
+      const ripple = document.createElement('div');
+      const rect = this.getBoundingClientRect();
+      const size = Math.max(rect.width, rect.height);
+      const x = e.clientX - rect.left - size / 2;
+      const y = e.clientY - rect.top - size / 2;
+      
+      ripple.style.cssText = `
+        position: absolute;
+        width: ${size}px;
+        height: ${size}px;
+        left: ${x}px;
+        top: ${y}px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        transform: scale(0);
+        animation: ripple 0.6s ease-out;
+        pointer-events: none;
+      `;
+      
+      this.style.position = 'relative';
+      this.style.overflow = 'hidden';
+      this.appendChild(ripple);
+      
+      setTimeout(() => {
+        ripple.remove();
+      }, 600);
+    });
+  });
+
+  // Add ripple animation
+  const style = document.createElement('style');
+  style.textContent = `
+    @keyframes ripple {
+      to {
+        transform: scale(2);
+        opacity: 0;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+</script>
+{% endblock %}

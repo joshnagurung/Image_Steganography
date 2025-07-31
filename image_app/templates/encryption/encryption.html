@@ -1,0 +1,420 @@
+{% extends 'base.html' %}
+{% block title %}Encryption | Image Steganography{% endblock %}
+
+{% block content %}
+<div class="min-h-screen py-12 px-4 sm:px-6 lg:px-8 relative">
+  <!-- Background Effects -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 w-32 h-32 bg-blue-500 bg-opacity-20 rounded-full blur-xl animate-pulse"></div>
+    <div class="absolute bottom-20 right-10 w-40 h-40 bg-purple-500 bg-opacity-20 rounded-full blur-xl animate-pulse" style="animation-delay: 2s;"></div>
+    <div class="absolute top-1/2 left-1/4 w-24 h-24 bg-pink-500 bg-opacity-20 rounded-full blur-xl animate-pulse" style="animation-delay: 4s;"></div>
+  </div>
+
+  <div class="max-w-4xl mx-auto relative z-10">
+    <!-- Header Section -->
+    <div class="text-center mb-12">
+      <div class="inline-flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 mb-6 animate-bounce">
+        <i data-lucide="shield-check" class="w-10 h-10 text-white"></i>
+      </div>
+      <h1 class="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+        Image Encryption
+      </h1>
+      <p class="text-xl text-gray-300 max-w-2xl mx-auto leading-relaxed">
+        Transform your sensitive data into invisible secrets. Upload an image and hide your message with military-grade encryption.
+      </p>
+    </div>
+
+    <!-- Main Encryption Interface -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      
+      <!-- Left Panel - Form -->
+      <div class="premium-glass rounded-3xl p-8 lg:p-10 space-y-8 hover:scale-[1.02] transition-all duration-500">
+        <div class="text-center mb-8">
+          <div class="w-16 h-16 bg-gradient-to-r from-green-400 to-blue-500 rounded-2xl flex items-center justify-center mx-auto mb-4">
+            <i data-lucide="upload" class="w-8 h-8 text-white"></i>
+          </div>
+          <h2 class="text-2xl font-bold text-white mb-2">Secure Upload</h2>
+          <p class="text-gray-400">Your data is encrypted locally before transmission</p>
+        </div>
+
+        <form id="encryptionForm" method="post" action="{% url 'encryption' %}" enctype="multipart/form-data" class="space-y-6">
+          {% csrf_token %}
+          
+          <!-- Image Upload Section -->
+          <div class="space-y-4">
+            <label for="image" class="block text-lg font-semibold text-white mb-3">
+              <i data-lucide="image" class="w-5 h-5 inline mr-2"></i>
+              Choose Cover Image
+            </label>
+            
+            <div class="relative">
+              <input type="file" id="image" name="image" required accept="image/*"
+                     class="hidden" onchange="handleFileSelect(this)">
+              
+              <div id="dropZone" class="border-2 border-dashed border-gray-600 rounded-2xl p-8 text-center cursor-pointer hover:border-blue-400 transition-all duration-300 bg-gray-800 bg-opacity-30">
+                <div id="uploadContent">
+                  <i data-lucide="cloud-upload" class="w-12 h-12 text-gray-400 mx-auto mb-4"></i>
+                  <p class="text-gray-300 text-lg mb-2">Drop your image here or click to browse</p>
+                  <p class="text-gray-500 text-sm">Supports JPG, PNG, GIF up to 10MB</p>
+                </div>
+                
+                <div id="previewContent" class="hidden">
+                  <img id="imagePreview" class="max-w-full max-h-48 mx-auto rounded-lg shadow-lg mb-4">
+                  <p id="fileName" class="text-green-400 font-medium"></p>
+                  <button type="button" onclick="clearFile()" class="mt-2 text-red-400 hover:text-red-300 text-sm">
+                    <i data-lucide="x" class="w-4 h-4 inline mr-1"></i>Remove
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Text Input Section -->
+          <div class="space-y-4">
+            <label for="text" class="block text-lg font-semibold text-white mb-3">
+              <i data-lucide="message-square" class="w-5 h-5 inline mr-2"></i>
+              Secret Message
+            </label>
+            
+            <div class="relative">
+              <textarea id="text" name="text" rows="6" required placeholder="Enter your confidential message here..."
+                        class="w-full bg-gray-800 bg-opacity-50 border border-gray-600 rounded-2xl px-4 py-3 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 transition-all duration-300 resize-none backdrop-blur-sm"></textarea>
+              
+              <div class="absolute bottom-3 right-3 text-gray-500 text-sm">
+                <span id="charCount">0</span> characters
+              </div>
+            </div>
+            
+            <div class="flex items-center space-x-2 text-sm text-gray-400">
+              <i data-lucide="info" class="w-4 h-4"></i>
+              <span>Your message will be encrypted and hidden within the image pixels</span>
+            </div>
+          </div>
+
+         
+          <!-- Submit Button -->
+          <button type="submit" id="submitBtn" class="w-full btn-premium btn-primary text-lg py-4 relative overflow-hidden group">
+            <span class="relative z-10 flex items-center justify-center">
+              <i data-lucide="lock" class="w-5 h-5 mr-2"></i>
+              <span id="btnText">Encrypt & Hide Message</span>
+            </span>
+            
+            <!-- Loading Animation -->
+            <div id="loadingSpinner" class="hidden absolute inset-0 flex items-center justify-center">
+              <div class="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </button>
+        </form>
+      </div>
+
+      <!-- Right Panel - Info & Preview -->
+      <div class="space-y-6">
+        
+        <!-- Process Steps -->
+        <div class="premium-glass rounded-3xl p-8">
+          <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <i data-lucide="list-checks" class="w-6 h-6 mr-3 text-green-400"></i>
+            How It Works
+          </h3>
+          
+          <div class="space-y-6">
+            <div class="flex items-start space-x-4 group">
+              <div class="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <span class="text-white font-bold">1</span>
+              </div>
+              <div>
+                <h4 class="text-white font-semibold mb-1">Upload Image</h4>
+                <p class="text-gray-400 text-sm">Select a cover image to hide your message</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-4 group">
+              <div class="w-10 h-10 bg-gradient-to-r from-purple-500 to-pink-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <span class="text-white font-bold">2</span>
+              </div>
+              <div>
+                <h4 class="text-white font-semibold mb-1">Enter Message</h4>
+                <p class="text-gray-400 text-sm">Type your confidential text to be hidden</p>
+              </div>
+            </div>
+            
+            <div class="flex items-start space-x-4 group">
+              <div class="w-10 h-10 bg-gradient-to-r from-pink-500 to-red-600 rounded-full flex items-center justify-center flex-shrink-0 group-hover:scale-110 transition-transform duration-300">
+                <span class="text-white font-bold">3</span>
+              </div>
+              <div>
+                <h4 class="text-white font-semibold mb-1">Encrypt & Download</h4>
+                <p class="text-gray-400 text-sm">Get your steganographic image with hidden data</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Security Features -->
+        <div class="premium-glass rounded-3xl p-8">
+          <h3 class="text-2xl font-bold text-white mb-6 flex items-center">
+            <i data-lucide="shield" class="w-6 h-6 mr-3 text-blue-400"></i>
+            Security Features
+          </h3>
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="ultra-glass rounded-xl p-4 text-center hover:scale-105 transition-transform duration-300">
+              <i data-lucide="eye-off" class="w-8 h-8 text-green-400 mx-auto mb-2"></i>
+              <h4 class="text-white font-medium mb-1">Invisible</h4>
+              <p class="text-gray-400 text-xs">Undetectable to human eye</p>
+            </div>
+            
+            <div class="ultra-glass rounded-xl p-4 text-center hover:scale-105 transition-transform duration-300">
+              <i data-lucide="key" class="w-8 h-8 text-blue-400 mx-auto mb-2"></i>
+              <h4 class="text-white font-medium mb-1">Encrypted</h4>
+              <p class="text-gray-400 text-xs">Military-grade security</p>
+            </div>
+            
+            <div class="ultra-glass rounded-xl p-4 text-center hover:scale-105 transition-transform duration-300">
+              <i data-lucide="zap" class="w-8 h-8 text-purple-400 mx-auto mb-2"></i>
+              <h4 class="text-white font-medium mb-1">Fast</h4>
+              <p class="text-gray-400 text-xs">Lightning quick processing</p>
+            </div>
+            
+            <div class="ultra-glass rounded-xl p-4 text-center hover:scale-105 transition-transform duration-300">
+              <i data-lucide="download" class="w-8 h-8 text-pink-400 mx-auto mb-2"></i>
+              <h4 class="text-white font-medium mb-1">Portable</h4>
+              <p class="text-gray-400 text-xs">Share anywhere safely</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tips -->
+        <div class="ultra-glass rounded-2xl p-6">
+          <h4 class="text-lg font-semibold text-white mb-4 flex items-center">
+            <i data-lucide="lightbulb" class="w-5 h-5 mr-2 text-yellow-400"></i>
+            Pro Tips
+          </h4>
+          <ul class="space-y-2 text-gray-400 text-sm">
+            <li class="flex items-start space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0"></i>
+              <span>Use high-resolution images for better hiding capacity</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0"></i>
+              <span>Complex images work better than simple ones</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <i data-lucide="check" class="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0"></i>
+              <span>Keep your original image safe for decryption</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    {% if message %}
+    <div class="mt-8 premium-glass rounded-2xl p-6 text-center border border-green-400 border-opacity-50">
+      <i data-lucide="check-circle" class="w-12 h-12 text-green-400 mx-auto mb-4"></i>
+      <h3 class="text-xl font-semibold text-white mb-2">Success!</h3>
+      <p class="text-green-400">{{ message }}</p>
+    </div>
+    {% endif %}
+  </div>
+
+
+  {% if stego_image %}
+<div class="mt-10 text-center">
+  <h3 class="text-2xl font-bold text-white mb-4">Your Encrypted Image</h3>
+  <img src="{{ MEDIA_URL }}{{ stego_image }}" alt="Encrypted Image"
+       class="mx-auto rounded-xl shadow-lg max-w-md mb-6">
+
+  <a href="{{ MEDIA_URL }}{{ stego_image }}" 
+     download 
+     class="inline-block px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-xl shadow-lg transition duration-300">
+    <i class="fas fa-download mr-2"></i> Download Encrypted Image
+  </a>
+</div>
+{% endif %}
+
+
+</div>
+
+<style>
+  /* Custom styles for this page */
+  .drag-over {
+    border-color: #60a5fa !important;
+    background-color: rgba(59, 130, 246, 0.1) !important;
+  }
+  
+  .file-input-label {
+    transition: all 0.3s ease;
+  }
+  
+  .file-input-label:hover {
+    transform: translateY(-2px);
+  }
+  
+  #charCount {
+    font-family: 'JetBrains Mono', monospace;
+  }
+  
+  /* Animation for form submission */
+  .form-submitting {
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  
+  .form-submitting .btn-premium {
+    background: linear-gradient(45deg, #6b7280, #9ca3af);
+  }
+</style>
+
+<script>
+  // Initialize Lucide icons
+  lucide.createIcons();
+
+  // File handling
+  const imageInput = document.getElementById('image');
+  const dropZone = document.getElementById('dropZone');
+  const uploadContent = document.getElementById('uploadContent');
+  const previewContent = document.getElementById('previewContent');
+  const imagePreview = document.getElementById('imagePreview');
+  const fileName = document.getElementById('fileName');
+  
+  // Text area character count
+  const textArea = document.getElementById('text');
+  const charCount = document.getElementById('charCount');
+  
+  textArea.addEventListener('input', function() {
+    charCount.textContent = this.value.length;
+  });
+
+  // Drag and drop functionality
+  dropZone.addEventListener('click', () => imageInput.click());
+  
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+  
+  dropZone.addEventListener('dragleave', () => {
+    dropZone.classList.remove('drag-over');
+  });
+  
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    
+    const files = e.dataTransfer.files;
+    if (files.length > 0) {
+      imageInput.files = files;
+      handleFileSelect(imageInput);
+    }
+  });
+
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select a valid image file.');
+        return;
+      }
+      
+      // Validate file size (10MB limit)
+      if (file.size > 10 * 1024 * 1024) {
+        alert('File size must be less than 10MB.');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        imagePreview.src = e.target.result;
+        fileName.textContent = file.name;
+        uploadContent.classList.add('hidden');
+        previewContent.classList.remove('hidden');
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  function clearFile() {
+    imageInput.value = '';
+    uploadContent.classList.remove('hidden');
+    previewContent.classList.add('hidden');
+  }
+
+  // Form submission with loading state
+  const form = document.getElementById('encryptionForm');
+  const submitBtn = document.getElementById('submitBtn');
+  const btnText = document.getElementById('btnText');
+  const loadingSpinner = document.getElementById('loadingSpinner');
+
+  form.addEventListener('submit', function(e) {
+    // Add loading state
+    submitBtn.disabled = true;
+    btnText.classList.add('hidden');
+    loadingSpinner.classList.remove('hidden');
+    form.classList.add('form-submitting');
+    
+    // You can add additional validation here
+    const imageFile = imageInput.files[0];
+    const messageText = textArea.value.trim();
+    
+    if (!imageFile) {
+      e.preventDefault();
+      alert('Please select an image file.');
+      resetForm();
+      return;
+    }
+    
+    if (!messageText) {
+      e.preventDefault();
+      alert('Please enter a message to hide.');
+      resetForm();
+      return;
+    }
+    
+    // If validation passes, form will submit normally
+    // The loading state will be cleared when the page reloads
+  });
+
+  function resetForm() {
+    submitBtn.disabled = false;
+    btnText.classList.remove('hidden');
+    loadingSpinner.classList.add('hidden');
+    form.classList.remove('form-submitting');
+  }
+
+  // Add some interactive animations
+  document.querySelectorAll('.ultra-glass, .premium-glass').forEach(element => {
+    element.addEventListener('mouseenter', function() {
+      this.style.transform = 'translateY(-2px) scale(1.01)';
+    });
+    
+    element.addEventListener('mouseleave', function() {
+      this.style.transform = 'translateY(0) scale(1)';
+    });
+  });
+
+  // Animate elements on scroll
+  const observerOptions = {
+    threshold: 0.1,
+    rootMargin: '0px 0px -50px 0px'
+  };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, observerOptions);
+
+  // Observe all major sections
+  document.querySelectorAll('.premium-glass, .ultra-glass').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(30px)';
+    el.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+    observer.observe(el);
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,674 @@
+{% extends 'base.html' %}
+
+{% block title %}Decrypt QR Code Token - Inkognito{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-8 px-4">
+    <!-- Cosmic Background -->
+    <div class="cosmic-bg"></div>
+    
+    <!-- Floating Orbs -->
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+    
+    <!-- Advanced Particle System -->
+    <div class="particle-container" id="particleContainer"></div>
+
+    <div class="max-w-6xl mx-auto w-full">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r from-red-500 via-pink-500 to-purple-600 flex items-center justify-center mb-6 animate-pulse">
+                <i data-lucide="unlock" class="w-10 h-10 text-white"></i>
+            </div>
+            
+            <h1 class="text-4xl lg:text-5xl font-bold mb-4 text-gradient text-glow">
+                🔓 Decrypt QR Code Token
+            </h1>
+            
+            <p class="text-lg text-gray-300 max-w-2xl mx-auto leading-relaxed">
+                Safely decrypt your QR code token with military-grade security. Enter your encrypted token and password to reveal the original data.
+            </p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Form Section -->
+            <div class="lg:col-span-2">
+                <div class="ultra-glass rounded-2xl p-8 relative overflow-hidden">
+                    <!-- Decorative Elements -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-500/10 to-red-500/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center space-x-3 mb-8">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center">
+                                <i data-lucide="key" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-semibold text-white">Token Decryption</h2>
+                                <p class="text-gray-400 text-sm">Enter your encrypted token details</p>
+                            </div>
+                        </div>
+                        
+                        <form method="post" class="space-y-8" id="decryptForm">
+                            {% csrf_token %}
+                            
+                            <!-- Token Field -->
+                            <div class="space-y-3">
+                                <label for="{{ form.token.id_for_label }}" class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                                    <span>{{ form.token.label }}</span>
+                                    <span class="text-red-400">*</span>
+                                </label>
+                                <div class="relative group">
+                                    <textarea 
+                                        name="{{ form.token.name }}" 
+                                        id="{{ form.token.id_for_label }}"
+                                        rows="6" 
+                                        class="w-full px-4 py-4 bg-black/20 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm resize-none transition-all duration-300 group-hover:border-gray-500"
+                                        placeholder="Paste your encrypted QR code token here..."
+                                        required
+                                    >{{ form.token.value|default_if_none:"" }}</textarea>
+                                    <div class="absolute top-4 right-4 opacity-50 group-hover:opacity-100 transition-opacity">
+                                        <i data-lucide="clipboard" class="w-5 h-5 text-gray-400"></i>
+                                    </div>
+                                    <!-- Character Counter -->
+                                    <div class="absolute bottom-3 right-3 text-xs text-gray-500" id="tokenCounter">
+                                        0 characters
+                                    </div>
+                                </div>
+                                {% if form.token.errors %}
+                                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center space-x-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 flex-shrink-0"></i>
+                                        <span class="text-red-300 text-sm">{{ form.token.errors.0 }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="space-y-3">
+                                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                    <span>{{ form.password.label }}</span>
+                                    <span class="text-red-400">*</span>
+                                </label>
+                                <div class="relative group">
+                                    <input 
+                                        type="password" 
+                                        name="{{ form.password.name }}" 
+                                        id="{{ form.password.id_for_label }}"
+                                        class="w-full px-4 py-4 bg-black/20 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm pr-12 transition-all duration-300 group-hover:border-gray-500"
+                                        placeholder="Enter your decryption password"
+                                        required
+                                    />
+                                    <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors" onclick="togglePassword()">
+                                        <i data-lucide="eye" id="passwordToggle" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center space-x-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 flex-shrink-0"></i>
+                                        <span class="text-red-300 text-sm">{{ form.password.errors.0 }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex flex-col sm:flex-row gap-4">
+                                <button type="submit" class="btn-premium btn-primary flex-1 flex items-center justify-center space-x-2" id="decryptBtn">
+                                    <i data-lucide="unlock" class="w-5 h-5"></i>
+                                    <span>Decrypt Token</span>
+                                </button>
+                                <button type="button" class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="clearForm()">
+                                    <i data-lucide="trash-2" class="w-5 h-5"></i>
+                                    <span>Clear</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Sidebar -->
+            <div class="space-y-6">
+                <!-- Security Features -->
+                <div class="ultra-glass rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-green-500/20 flex items-center justify-center">
+                            <i data-lucide="shield-check" class="w-5 h-5 text-green-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white">Security Features</h3>
+                    </div>
+                    <div class="space-y-3 text-sm text-gray-300">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                            <span>AES-256 Encryption</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span>Zero-Knowledge Processing</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <span>Client-Side Decryption</span>
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                            <span>No Data Storage</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Instructions -->
+                <div class="ultra-glass rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white">How to Decrypt</h3>
+                    </div>
+                    <div class="space-y-4 text-sm text-gray-300">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">1</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Paste Token</p>
+                                <p>Copy and paste your encrypted QR token data into the text area</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">2</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Enter Password</p>
+                                <p>Provide the password that was used during encryption</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-pink-500 to-red-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">3</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Decrypt</p>
+                                <p>Click decrypt to reveal your hidden message securely</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="ultra-glass rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                            <i data-lucide="zap" class="w-5 h-5 text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white">Quick Actions</h3>
+                    </div>
+                    <div class="space-y-3">
+                        <button class="btn-premium btn-secondary w-full text-sm flex items-center justify-center space-x-2" onclick="pasteFromClipboard()">
+                            <i data-lucide="clipboard" class="w-4 h-4"></i>
+                            <span>Paste from Clipboard</span>
+                        </button>
+                        <a href="{% url 'home' %}" class="btn-premium btn-secondary w-full text-sm flex items-center justify-center space-x-2">
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Back to Home</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        {% if error %}
+            <div class="mt-12 animate-slideIn">
+                <div class="premium-glass rounded-2xl p-8 border-l-4 border-red-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-red-500/5 rounded-full blur-3xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-red-500/20 flex items-center justify-center">
+                                <i data-lucide="alert-circle" class="w-8 h-8 text-red-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-semibold text-white">❌ Decryption Failed</h3>
+                                <p class="text-red-400">Unable to decrypt the provided token</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-red-900/20 rounded-xl p-6 border border-red-500/30 mb-6">
+                            <div class="flex items-start space-x-3">
+                                <i data-lucide="x-circle" class="w-5 h-5 text-red-400 mt-0.5 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="text-red-300 font-medium mb-2">Error Details:</h4>
+                                    <p class="text-red-200">{{ error }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-yellow-900/20 rounded-xl p-6 border border-yellow-500/30">
+                            <div class="flex items-start space-x-3">
+                                <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0"></i>
+                                <div>
+                                    <h4 class="text-yellow-300 font-medium mb-3">Troubleshooting Tips:</h4>
+                                    <ul class="text-yellow-200 text-sm space-y-2">
+                                        <li class="flex items-start space-x-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></span>
+                                            <span>Ensure the token data is complete and unmodified</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></span>
+                                            <span>Verify you're using the correct decryption password</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></span>
+                                            <span>Check that the token was encrypted with the same system</span>
+                                        </li>
+                                        <li class="flex items-start space-x-2">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></span>
+                                            <span>Remove any extra spaces or line breaks from the token</span>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
+        {% if text %}
+            <div class="mt-12 animate-slideIn">
+                <div class="premium-glass rounded-2xl p-8 border-l-4 border-green-500 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center space-x-4 mb-6">
+                            <div class="w-16 h-16 rounded-2xl bg-green-500/20 flex items-center justify-center">
+                                <i data-lucide="check-circle" class="w-8 h-8 text-green-400"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-2xl font-semibold text-white">✅ Decryption Successful</h3>
+                                <p class="text-green-400">Your token has been successfully decrypted</p>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-black/30 rounded-xl p-6 border border-green-500/30">
+                            <div class="flex items-center justify-between mb-4">
+                                <h4 class="text-lg font-medium text-white flex items-center space-x-2">
+                                    <i data-lucide="file-text" class="w-5 h-5"></i>
+                                    <span>Decrypted Content</span>
+                                </h4>
+                                <div class="flex space-x-2">
+                                    <button class="btn-premium btn-secondary text-sm px-4 py-2" onclick="copyToClipboard('{{ text|escapejs }}')">
+                                        <i data-lucide="copy" class="w-4 h-4 mr-2"></i>
+                                        Copy
+                                    </button>
+                                    <button class="btn-premium btn-secondary text-sm px-4 py-2" onclick="downloadAsFile('{{ text|escapejs }}')">
+                                        <i data-lucide="download" class="w-4 h-4 mr-2"></i>
+                                        Download
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="bg-gray-900 rounded-lg p-6 font-mono text-green-300 whitespace-pre-wrap break-all border border-green-500/20 max-h-96 overflow-y-auto">{{ text }}</div>
+                            
+                            <!-- Content Stats -->
+                            <div class="mt-4 flex items-center space-x-6 text-sm text-gray-400">
+                                <div class="flex items-center space-x-2">
+                                    <i data-lucide="type" class="w-4 h-4"></i>
+                                    <span>{{ text|length }} characters</span>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <i data-lucide="clock" class="w-4 h-4"></i>
+                                    <span id="decryptTime">Decrypted just now</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<style>
+    /* Add the cosmic design system styles */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    }
+
+    .cosmic-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--dark-gradient);
+        z-index: -1;
+    }
+
+    .cosmic-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        animation: cosmicPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes cosmicPulse {
+        0% { opacity: 0.5; transform: scale(1); }
+        100% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .particle-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        animation: particleFloat 20s infinite linear;
+    }
+
+    @keyframes particleFloat {
+        0% {
+            transform: translateY(100vh) translateX(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% {
+            transform: translateY(-100px) translateX(100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    .floating-orb {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        filter: blur(1px);
+        animation: orbFloat 6s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 60px;
+        height: 60px;
+        top: 10%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 40px;
+        height: 40px;
+        top: 60%;
+        right: 10%;
+        animation-delay: 2s;
+        background: var(--secondary-gradient);
+    }
+
+    .orb-3 {
+        width: 80px;
+        height: 80px;
+        bottom: 20%;
+        left: 15%;
+        animation-delay: 4s;
+        background: var(--primary-gradient);
+    }
+
+    @keyframes orbFloat {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translateY(-20px) scale(1.1);
+            opacity: 0.9;
+        }
+    }
+
+    .ultra-glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .premium-glass {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-premium {
+        position: relative;
+        padding: 16px 32px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .text-gradient {
+        background: var(--primary-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .text-glow {
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-slideIn {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .floating-orb, .particle {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Create particles
+    function createParticles() {
+        const container = document.getElementById('particleContainer');
+        const particleCount = window.innerWidth > 768 ? 30 : 0;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            container.appendChild(particle);
+        }
+    }
+
+    // Initialize particles on load
+    window.addEventListener('load', createParticles);
+
+    // Toggle password visibility
+    function togglePassword() {
+        const passwordInput = document.querySelector('input[type="password"], input[type="text"]');
+        const toggleIcon = document.getElementById('passwordToggle');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.setAttribute('data-lucide', 'eye');
+        }
+        
+        lucide.createIcons();
+    }
+
+    // Clear form function
+    function clearForm() {
+        document.querySelector('textarea').value = '';
+        document.querySelector('input[type="password"], input[type="text"]').value = '';
+        updateTokenCounter();
+    }
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            const button = event.target.closest('button');
+            const originalContent = button.innerHTML;
+            button.innerHTML = '<i data-lucide="check" class="w-4 h-4 mr-2"></i>Copied!';
+            button.classList.add('bg-green-600');
+            
+            setTimeout(() => {
+                button.innerHTML = originalContent;
+                button.classList.remove('bg-green-600');
+                lucide.createIcons();
+            }, 2000);
+        });
+    }
+
+    // Download as file function
+    function downloadAsFile(text) {
+        const blob = new Blob([text], { type: 'text/plain' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'decrypted-content.txt';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+    }
+
+    // Paste from clipboard function
+    async function pasteFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            document.querySelector('textarea').value = text;
+            updateTokenCounter();
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+    }
+
+    // Update token character counter
+    function updateTokenCounter() {
+        const textarea = document.querySelector('textarea');
+        const counter = document.getElementById('tokenCounter');
+        const length = textarea.value.length;
+        counter.textContent = `${length} characters`;
+    }
+
+    // Auto-resize textarea
+    const textarea = document.querySelector('textarea');
+    textarea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+        updateTokenCounter();
+    });
+
+    // Form validation and submission
+    document.getElementById('decryptForm').addEventListener('submit', function(e) {
+        const token = document.querySelector('textarea').value.trim();
+        const password = document.querySelector('input[type="password"], input[type="text"]').value.trim();
+        
+        if (!token || !password) {
+            e.preventDefault();
+            alert('Please fill in all required fields.');
+            return;
+        }
+        
+        // Show loading state
+        const submitButton = document.getElementById('decryptBtn');
+        const originalContent = submitButton.innerHTML;
+        submitButton.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i>Decrypting...';
+        submitButton.disabled = true;
+        
+        // Re-enable button after a delay (in case of errors)
+        setTimeout(() => {
+            submitButton.innerHTML = originalContent;
+            submitButton.disabled = false;
+            lucide.createIcons();
+        }, 10000);
+    });
+
+    // Smooth scroll to results
+    {% if text or error %}
+        setTimeout(() => {
+            const resultsSection = document.querySelector('.animate-slideIn');
+            if (resultsSection) {
+                resultsSection.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
+        }, 100);
+    {% endif %}
+
+    // Initialize character counter
+    updateTokenCounter();
+</script>
+{% endblock %}

@@ -1,0 +1,882 @@
+{% extends 'base.html' %}
+
+{% block title %}Generate Encrypted QR Code - Inkognito{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center py-8 px-4">
+    <!-- Cosmic Background -->
+    <div class="cosmic-bg"></div>
+    
+    <!-- Floating Orbs -->
+    <div class="floating-orb orb-1"></div>
+    <div class="floating-orb orb-2"></div>
+    <div class="floating-orb orb-3"></div>
+    
+    <!-- Advanced Particle System -->
+    <div class="particle-container" id="particleContainer"></div>
+
+    <div class="max-w-7xl mx-auto w-full">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <div class="w-20 h-20 mx-auto rounded-2xl bg-gradient-to-r from-green-500 via-blue-500 to-purple-600 flex items-center justify-center mb-6 animate-pulse">
+                <i data-lucide="qr-code" class="w-10 h-10 text-white"></i>
+            </div>
+            
+            <h1 class="text-4xl lg:text-5xl font-bold mb-4 text-gradient text-glow">
+                🔐 Generate Encrypted QR Code
+            </h1>
+            
+            <p class="text-lg text-gray-300 max-w-3xl mx-auto leading-relaxed">
+                Transform your sensitive data into a secure, encrypted QR code. Perfect for sharing confidential information with military-grade protection.
+            </p>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            <!-- Generator Section -->
+            <div class="space-y-8">
+                <!-- Input Form -->
+                <div class="ultra-glass rounded-2xl p-8 relative overflow-hidden">
+                    <!-- Decorative Elements -->
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-green-500/10 to-blue-500/10 rounded-full blur-3xl"></div>
+                    <div class="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-purple-500/10 to-pink-500/10 rounded-full blur-2xl"></div>
+                    
+                    <div class="relative z-10">
+                        <div class="flex items-center space-x-3 mb-8">
+                            <div class="w-12 h-12 rounded-xl bg-gradient-to-r from-green-500 to-blue-600 flex items-center justify-center">
+                                <i data-lucide="edit-3" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div>
+                                <h2 class="text-2xl font-semibold text-white">Create Encrypted QR</h2>
+                                <p class="text-gray-400 text-sm">Enter your data and encryption settings</p>
+                            </div>
+                        </div>
+                        
+                        <form method="post" class="space-y-8" id="qrForm">
+                            {% csrf_token %}
+                            
+                            <!-- Text Input -->
+                            <div class="space-y-3">
+                                <label for="{{ form.text.id_for_label }}" class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                    <i data-lucide="type" class="w-4 h-4"></i>
+                                    <span>{{ form.text.label }}</span>
+                                    <span class="text-red-400">*</span>
+                                </label>
+                                <div class="relative group">
+                                    <textarea 
+                                        name="{{ form.text.name }}" 
+                                        id="{{ form.text.id_for_label }}"
+                                        rows="6" 
+                                        class="w-full px-4 py-4 bg-black/20 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent backdrop-blur-sm resize-none transition-all duration-300 group-hover:border-gray-500"
+                                        placeholder="Enter text, URL, email, phone number, or any sensitive data you want to encrypt..."
+                                        required
+                                        maxlength="2000"
+                                        oninput="updateCharCount(); validateInput();"
+                                    >{{ form.text.value|default_if_none:"" }}</textarea>
+                                    <div class="absolute bottom-3 right-3 text-xs text-gray-400" id="charCount">
+                                        0 / 2000
+                                    </div>
+                                </div>
+                                {% if form.text.errors %}
+                                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center space-x-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 flex-shrink-0"></i>
+                                        <span class="text-red-300 text-sm">{{ form.text.errors.0 }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Quick Templates -->
+                            <div class="space-y-3">
+                                <label class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                    <i data-lucide="zap" class="w-4 h-4"></i>
+                                    <span>Quick Templates</span>
+                                </label>
+                                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                                    <button type="button" class="btn-template" onclick="setTemplate('url')">
+                                        <i data-lucide="link" class="w-4 h-4"></i>
+                                        <span>Website</span>
+                                    </button>
+                                    <button type="button" class="btn-template" onclick="setTemplate('email')">
+                                        <i data-lucide="mail" class="w-4 h-4"></i>
+                                        <span>Email</span>
+                                    </button>
+                                    <button type="button" class="btn-template" onclick="setTemplate('phone')">
+                                        <i data-lucide="phone" class="w-4 h-4"></i>
+                                        <span>Phone</span>
+                                    </button>
+                                    <button type="button" class="btn-template" onclick="setTemplate('wifi')">
+                                        <i data-lucide="wifi" class="w-4 h-4"></i>
+                                        <span>WiFi</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Password Field -->
+                            <div class="space-y-3">
+                                <label for="{{ form.password.id_for_label }}" class="block text-sm font-medium text-gray-300 flex items-center space-x-2">
+                                    <i data-lucide="lock" class="w-4 h-4"></i>
+                                    <span>{{ form.password.label }}</span>
+                                    <span class="text-red-400">*</span>
+                                </label>
+                                <div class="relative group">
+                                    <input 
+                                        type="password" 
+                                        name="{{ form.password.name }}" 
+                                        id="{{ form.password.id_for_label }}"
+                                        class="w-full px-4 py-4 bg-black/20 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-transparent backdrop-blur-sm pr-12 transition-all duration-300 group-hover:border-gray-500"
+                                        placeholder="Create a strong encryption password"
+                                        required
+                                        oninput="checkPasswordStrength(this.value)"
+                                    />
+                                    <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors" onclick="togglePassword()">
+                                        <i data-lucide="eye" id="passwordToggle" class="w-5 h-5"></i>
+                                    </button>
+                                </div>
+                                <div class="password-strength" id="passwordStrength"></div>
+                                <div class="text-xs text-gray-400" id="passwordHelp">
+                                    Use 8+ characters with uppercase, lowercase, numbers, and symbols
+                                </div>
+                                {% if form.password.errors %}
+                                    <div class="bg-red-900/20 border border-red-500/30 rounded-lg p-3 flex items-center space-x-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4 text-red-400 flex-shrink-0"></i>
+                                        <span class="text-red-300 text-sm">{{ form.password.errors.0 }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+
+                            <!-- Generate Button -->
+                            <button type="submit" class="btn-premium btn-primary w-full flex items-center justify-center space-x-2" id="generateBtn">
+                                <i data-lucide="qr-code" class="w-5 h-5"></i>
+                                <span>Generate Encrypted QR Code</span>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Features Info -->
+                <div class="ultra-glass rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-yellow-500/20 flex items-center justify-center">
+                            <i data-lucide="star" class="w-5 h-5 text-yellow-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white">Encryption Features</h3>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 text-sm text-gray-300">
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-green-400"></div>
+                            <span>AES-256 Encryption</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+                            <span>High Resolution</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+                            <span>Error Correction</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <div class="w-2 h-2 rounded-full bg-pink-400"></div>
+                            <span>Instant Generation</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QR Code Display Section -->
+            <div class="space-y-8">
+                {% if qr_img %}
+                    <!-- QR Code Display -->
+                    <div class="premium-glass rounded-2xl p-8 text-center relative overflow-hidden animate-slideIn">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-green-500/5 rounded-full blur-3xl"></div>
+                        
+                        <div class="relative z-10">
+                            <div class="flex items-center justify-center space-x-3 mb-6">
+                                <div class="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+                                    <i data-lucide="check-circle" class="w-6 h-6 text-green-400"></i>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-semibold text-white">Your Encrypted QR Code</h3>
+                                    <p class="text-green-400 text-sm">Successfully generated and encrypted</p>
+                                </div>
+                            </div>
+                            
+                            <!-- QR Code Image -->
+                            <div class="bg-white rounded-2xl p-8 mb-6 inline-block shadow-2xl relative">
+                                <img src="{{ qr_img }}" alt="Generated Encrypted QR Code" class="max-w-full h-auto" id="qrImage" />
+                                <div class="absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full flex items-center space-x-1">
+                                    <i data-lucide="shield" class="w-3 h-3"></i>
+                                    <span>Encrypted</span>
+                                </div>
+                            </div>
+                            
+                            <!-- QR Code Info -->
+                            <div class="bg-black/30 rounded-xl p-4 mb-6 text-left">
+                                <div class="flex items-center justify-between mb-3">
+                                    <span class="text-sm text-gray-400 flex items-center space-x-2">
+                                        <i data-lucide="info" class="w-4 h-4"></i>
+                                        <span>QR Code Details:</span>
+                                    </span>
+                                    <div class="flex items-center space-x-2 text-xs text-green-400">
+                                        <i data-lucide="shield-check" class="w-3 h-3"></i>
+                                        <span>AES-256 Protected</span>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 text-sm">
+                                    <div>
+                                        <span class="text-gray-400">Data Length:</span>
+                                        <span class="text-white ml-2">{{ form.text.value|length }} characters</span>
+                                    </div>
+                                    <div>
+                                        <span class="text-gray-400">Generated:</span>
+                                        <span class="text-white ml-2" id="generatedTime">Just now</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- Action Buttons -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <button class="btn-premium btn-primary flex items-center justify-center space-x-2" onclick="downloadQR()">
+                                    <i data-lucide="download" class="w-4 h-4"></i>
+                                    <span>Download</span>
+                                </button>
+                                <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="shareQR()">
+                                    <i data-lucide="share-2" class="w-4 h-4"></i>
+                                    <span>Share</span>
+                                </button>
+                                <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="printQR()">
+                                    <i data-lucide="printer" class="w-4 h-4"></i>
+                                    <span>Print</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                {% else %}
+                    <!-- Placeholder -->
+                    <div class="ultra-glass rounded-2xl p-8 text-center">
+                        <div class="w-32 h-32 mx-auto rounded-2xl bg-gradient-to-r from-gray-600 to-gray-700 flex items-center justify-center mb-6 opacity-50">
+                            <i data-lucide="qr-code" class="w-16 h-16 text-gray-400"></i>
+                        </div>
+                        <h3 class="text-xl font-semibold text-gray-400 mb-2">QR Code Preview</h3>
+                        <p class="text-gray-500 text-sm mb-6">Enter your data and password to generate an encrypted QR code</p>
+                        
+                        <!-- Preview Features -->
+                        <div class="grid grid-cols-2 gap-4 text-xs text-gray-500">
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="shield" class="w-3 h-3"></i>
+                                <span>Military-grade encryption</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="download" class="w-3 h-3"></i>
+                                <span>Multiple download formats</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="smartphone" class="w-3 h-3"></i>
+                                <span>Mobile-friendly scanning</span>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <i data-lucide="printer" class="w-3 h-3"></i>
+                                <span>Print-ready quality</span>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Instructions -->
+                <div class="ultra-glass rounded-2xl p-6">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center">
+                            <i data-lucide="info" class="w-5 h-5 text-blue-400"></i>
+                        </div>
+                        <h3 class="text-lg font-semibold text-white">How to Use</h3>
+                    </div>
+                    <div class="space-y-4 text-sm text-gray-300">
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-green-500 to-blue-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">1</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Enter Your Data</p>
+                                <p>Type or paste the sensitive information you want to encrypt</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">2</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Set Strong Password</p>
+                                <p>Create a secure password for encryption (remember this!)</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start space-x-3">
+                            <div class="w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-pink-600 text-white text-xs flex items-center justify-center mt-0.5 flex-shrink-0 font-medium">3</div>
+                            <div>
+                                <p class="font-medium text-white mb-1">Generate & Share</p>
+                                <p>Download, print, or share your encrypted QR code securely</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Notice -->
+                <div class="ultra-glass rounded-2xl p-6 border-l-4 border-yellow-500">
+                    <div class="flex items-start space-x-3">
+                        <i data-lucide="shield-alert" class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0"></i>
+                        <div>
+                            <h4 class="text-yellow-300 font-medium mb-2">Security Notice</h4>
+                            <p class="text-yellow-200 text-sm leading-relaxed">
+                                Remember your encryption password! Without it, the QR code data cannot be decrypted. 
+                                We use client-side encryption and don't store your passwords or data.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="mt-12">
+            <div class="ultra-glass rounded-2xl p-8">
+                <div class="flex items-center justify-between mb-6">
+                    <div class="flex items-center space-x-3">
+                        <i data-lucide="zap" class="w-6 h-6 text-gray-400"></i>
+                        <h3 class="text-xl font-semibold text-white">Quick Actions</h3>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="clearForm()">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        <span>Clear Form</span>
+                    </button>
+                    <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="generateRandomPassword()">
+                        <i data-lucide="key" class="w-4 h-4"></i>
+                        <span>Random Password</span>
+                    </button>
+                    <button class="btn-premium btn-secondary flex items-center justify-center space-x-2" onclick="pasteFromClipboard()">
+                        <i data-lucide="clipboard" class="w-4 h-4"></i>
+                        <span>Paste Text</span>
+                    </button>
+                    <a href="{% url 'home' %}" class="btn-premium btn-secondary flex items-center justify-center space-x-2">
+                        <i data-lucide="home" class="w-4 h-4"></i>
+                        <span>Back to Home</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Add the cosmic design system styles */
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        --dark-gradient: linear-gradient(135deg, #0c0c0c 0%, #1a1a2e 50%, #16213e 100%);
+    }
+
+    .cosmic-bg {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: var(--dark-gradient);
+        z-index: -1;
+    }
+
+    .cosmic-bg::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: 
+            radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 40%, rgba(120, 219, 255, 0.2) 0%, transparent 50%);
+        animation: cosmicPulse 8s ease-in-out infinite alternate;
+    }
+
+    @keyframes cosmicPulse {
+        0% { opacity: 0.5; transform: scale(1); }
+        100% { opacity: 0.8; transform: scale(1.1); }
+    }
+
+    .particle-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    .particle {
+        position: absolute;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 50%;
+        animation: particleFloat 20s infinite linear;
+    }
+
+    @keyframes particleFloat {
+        0% {
+            transform: translateY(100vh) translateX(0) rotate(0deg);
+            opacity: 0;
+        }
+        10% { opacity: 1; }
+        90% { opacity: 1; }
+        100% {
+            transform: translateY(-100px) translateX(100px) rotate(360deg);
+            opacity: 0;
+        }
+    }
+
+    .floating-orb {
+        position: absolute;
+        border-radius: 50%;
+        background: var(--accent-gradient);
+        filter: blur(1px);
+        animation: orbFloat 6s ease-in-out infinite;
+    }
+
+    .orb-1 {
+        width: 60px;
+        height: 60px;
+        top: 10%;
+        left: 5%;
+        animation-delay: 0s;
+    }
+
+    .orb-2 {
+        width: 40px;
+        height: 40px;
+        top: 60%;
+        right: 10%;
+        animation-delay: 2s;
+        background: var(--secondary-gradient);
+    }
+
+    .orb-3 {
+        width: 80px;
+        height: 80px;
+        bottom: 20%;
+        left: 15%;
+        animation-delay: 4s;
+        background: var(--primary-gradient);
+    }
+
+    @keyframes orbFloat {
+        0%, 100% {
+            transform: translateY(0px) scale(1);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translateY(-20px) scale(1.1);
+            opacity: 0.9;
+        }
+    }
+
+    .ultra-glass {
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 
+            0 8px 32px rgba(0, 0, 0, 0.3),
+            inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    }
+
+    .premium-glass {
+        background: rgba(255, 255, 255, 0.08);
+        backdrop-filter: blur(25px);
+        border: 1px solid rgba(255, 255, 255, 0.15);
+        box-shadow: 
+            0 20px 60px rgba(0, 0, 0, 0.4),
+            inset 0 1px 0 rgba(255, 255, 255, 0.3),
+            0 0 0 1px rgba(255, 255, 255, 0.05);
+    }
+
+    .btn-premium {
+        position: relative;
+        padding: 16px 32px;
+        border-radius: 16px;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+        border: none;
+        cursor: pointer;
+    }
+
+    .btn-primary {
+        background: var(--primary-gradient);
+        color: white;
+        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 20px 50px rgba(102, 126, 234, 0.6);
+    }
+
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        backdrop-filter: blur(10px);
+    }
+
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.2);
+        transform: translateY(-3px);
+    }
+
+    .btn-template {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 12px;
+        padding: 12px;
+        color: white;
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        space-y: 2;
+        cursor: pointer;
+    }
+
+    .btn-template:hover {
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .text-gradient {
+        background: var(--primary-gradient);
+        background-clip: text;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .text-glow {
+        text-shadow: 0 0 30px rgba(255, 255, 255, 0.5);
+    }
+
+    .password-strength {
+        height: 4px;
+        border-radius: 2px;
+        margin-top: 8px;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    .strength-weak { 
+        background: linear-gradient(90deg, #ef4444 0%, #ef4444 33%, rgba(255, 255, 255, 0.1) 33%);
+    }
+    .strength-medium { 
+        background: linear-gradient(90deg, #f59e0b 0%, #f59e0b 66%, rgba(255, 255, 255, 0.1) 66%);
+    }
+    .strength-strong { 
+        background: linear-gradient(90deg, #10b981 0%, #10b981 100%);
+    }
+
+    @keyframes slideIn {
+        0% {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .animate-slideIn {
+        animation: slideIn 0.6s ease-out;
+    }
+
+    @media (max-width: 768px) {
+        .floating-orb, .particle {
+            display: none;
+        }
+    }
+</style>
+
+<script>
+    // Initialize Lucide icons
+    lucide.createIcons();
+
+    // Create particles
+    function createParticles() {
+        const container = document.getElementById('particleContainer');
+        const particleCount = window.innerWidth > 768 ? 30 : 0;
+        
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 20 + 's';
+            particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+            container.appendChild(particle);
+        }
+    }
+
+    // Initialize particles on load
+    window.addEventListener('load', createParticles);
+
+    // Character counter
+    const textArea = document.querySelector('textarea');
+    const charCount = document.getElementById('charCount');
+    
+    function updateCharCount() {
+        const count = textArea.value.length;
+        charCount.textContent = `${count} / 2000`;
+        charCount.style.color = count > 1800 ? '#ef4444' : '#9ca3af';
+    }
+    
+    textArea.addEventListener('input', updateCharCount);
+    updateCharCount(); // Initial count
+
+    // Auto-resize textarea
+    textArea.addEventListener('input', function() {
+        this.style.height = 'auto';
+        this.style.height = Math.min(this.scrollHeight, 200) + 'px';
+    });
+
+    // Quick templates
+    function setTemplate(type) {
+        const templates = {
+            url: 'https://example.com/secret-page',
+            email: 'mailto:secret@example.com?subject=Confidential&body=Secret message here',
+            phone: 'tel:+1234567890',
+            wifi: 'WIFI:T:WPA;S:SecretNetwork;P:SecretPassword123;H:false;;'
+        };
+        
+        textArea.value = templates[type];
+        textArea.focus();
+        updateCharCount();
+        validateInput();
+        
+        // Auto-resize after setting template
+        textArea.style.height = 'auto';
+        textArea.style.height = Math.min(textArea.scrollHeight, 200) + 'px';
+    }
+
+    // Toggle password visibility
+    function togglePassword() {
+        const passwordInput = document.querySelector('input[type="password"], input[type="text"]');
+        const toggleIcon = document.getElementById('passwordToggle');
+        
+        if (passwordInput.type === 'password') {
+            passwordInput.type = 'text';
+            toggleIcon.setAttribute('data-lucide', 'eye-off');
+        } else {
+            passwordInput.type = 'password';
+            toggleIcon.setAttribute('data-lucide', 'eye');
+        }
+        
+        lucide.createIcons();
+    }
+
+    // Password strength checker
+    function checkPasswordStrength(password) {
+        const strengthBar = document.getElementById('passwordStrength');
+        const passwordHelp = document.getElementById('passwordHelp');
+        
+        let strength = 0;
+        let feedback = [];
+        
+        if (password.length >= 8) strength++;
+        else feedback.push('8+ characters');
+        
+        if (/[a-z]/.test(password)) strength++;
+        else feedback.push('lowercase letter');
+        
+        if (/[A-Z]/.test(password)) strength++;
+        else feedback.push('uppercase letter');
+        
+        if (/[0-9]/.test(password)) strength++;
+        else feedback.push('number');
+        
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        else feedback.push('special character');
+        
+        strengthBar.className = 'password-strength';
+        
+        if (strength <= 2) {
+            strengthBar.classList.add('strength-weak');
+            passwordHelp.textContent = `Weak password. Add: ${feedback.join(', ')}`;
+            passwordHelp.className = 'text-xs text-red-400';
+        } else if (strength <= 4) {
+            strengthBar.classList.add('strength-medium');
+            passwordHelp.textContent = `Good password. Consider adding: ${feedback.join(', ')}`;
+            passwordHelp.className = 'text-xs text-yellow-400';
+        } else {
+            strengthBar.classList.add('strength-strong');
+            passwordHelp.textContent = 'Strong password!';
+            passwordHelp.className = 'text-xs text-green-400';
+        }
+    }
+
+    // Form validation
+    function validateInput() {
+        const text = textArea.value.trim();
+        const generateBtn = document.getElementById('generateBtn');
+        
+        if (text.length > 0) {
+            generateBtn.disabled = false;
+            generateBtn.classList.remove('opacity-50');
+        } else {
+            generateBtn.disabled = true;
+            generateBtn.classList.add('opacity-50');
+        }
+    }
+
+    // Form submission with loading state
+    document.getElementById('qrForm').addEventListener('submit', function(e) {
+        const generateBtn = document.getElementById('generateBtn');
+        const originalContent = generateBtn.innerHTML;
+        
+        generateBtn.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 mr-2 animate-spin"></i>Generating...';
+        generateBtn.disabled = true;
+        
+        // Re-enable button after a delay (in case of errors)
+        setTimeout(() => {
+            generateBtn.innerHTML = originalContent;
+            generateBtn.disabled = false;
+            lucide.createIcons();
+        }, 10000);
+    });
+
+    // Download QR code
+    function downloadQR() {
+        const qrImage = document.getElementById('qrImage');
+        if (qrImage) {
+            const link = document.createElement('a');
+            link.download = 'encrypted-qr-code.png';
+            link.href = qrImage.src;
+            link.click();
+        }
+    }
+
+    // Share QR code
+    function shareQR() {
+        const qrImage = document.getElementById('qrImage');
+        if (qrImage && navigator.share) {
+            fetch(qrImage.src)
+                .then(res => res.blob())
+                .then(blob => {
+                    const file = new File([blob], 'encrypted-qr-code.png', { type: 'image/png' });
+                    navigator.share({
+                        title: 'Encrypted QR Code',
+                        text: 'Check out this encrypted QR code!',
+                        files: [file]
+                    });
+                })
+                .catch(err => {
+                    // Fallback: copy image URL
+                    navigator.clipboard.writeText(qrImage.src);
+                    alert('QR code URL copied to clipboard!');
+                });
+        } else {
+            // Fallback: copy image URL
+            navigator.clipboard.writeText(qrImage.src);
+            alert('QR code URL copied to clipboard!');
+        }
+    }
+
+    // Print QR code
+    function printQR() {
+        const qrImage = document.getElementById('qrImage');
+        if (qrImage) {
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(`
+                <html>
+                    <head><title>Encrypted QR Code</title></head>
+                    <body style="text-align: center; padding: 20px;">
+                        <h2>Encrypted QR Code</h2>
+                        <img src="${qrImage.src}" style="max-width: 100%;">
+                        <p>Generated by Inkognito - Encrypted with AES-256</p>
+                    </body>
+                </html>
+            `);
+            printWindow.document.close();
+            printWindow.print();
+        }
+    }
+
+    // Clear form
+    function clearForm() {
+        textArea.value = '';
+        document.querySelector('input[type="password"], input[type="text"]').value = '';
+        updateCharCount();
+        validateInput();
+        textArea.style.height = 'auto';
+        textArea.focus();
+    }
+
+    // Generate random password
+    function generateRandomPassword() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+        let password = '';
+        for (let i = 0; i < 16; i++) {
+            password += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        
+        const passwordInput = document.querySelector('input[type="password"], input[type="text"]');
+        passwordInput.value = password;
+        checkPasswordStrength(password);
+        passwordInput.focus();
+    }
+
+    // Paste from clipboard
+    async function pasteFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            textArea.value = text;
+            updateCharCount();
+            validateInput();
+            textArea.style.height = 'auto';
+            textArea.style.height = Math.min(textArea.scrollHeight, 200) + 'px';
+        } catch (err) {
+            console.error('Failed to read clipboard contents: ', err);
+        }
+    }
+
+    // Keyboard shortcuts
+    document.addEventListener('keydown', function(e) {
+        // Ctrl/Cmd + Enter to generate
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+            e.preventDefault();
+            document.getElementById('qrForm').submit();
+        }
+        
+        // Ctrl/Cmd + K to clear
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            clearForm();
+        }
+    });
+
+    // Auto-focus on text area when page loads
+    window.addEventListener('load', function() {
+        if (window.innerWidth > 768) {
+            textArea.focus();
+        }
+    });
+
+    // Initialize validation
+    validateInput();
+
+    {% if qr_img %}
+        // Smooth scroll to QR code when generated
+        setTimeout(() => {
+            document.querySelector('.animate-slideIn').scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }, 100);
+    {% endif %}
+</script>
+{% endblock %}
