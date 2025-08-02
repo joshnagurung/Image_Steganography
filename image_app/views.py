@@ -93,45 +93,45 @@ def hide_text_image(image, text):
     return stepic.encode(image, data)
 
 
-def encryption_view(request):
-    message = ""
-    error = ""
-    saved_filename = None
+# def encryption_view(request):
+#     message = ""
+#     error = ""
+#     saved_filename = None
 
-    if request.method == "POST":
-        try:
-            text = request.POST['text']
-            image_file = request.FILES['image']
-            image = Image.open(image_file)
+#     if request.method == "POST":
+#         try:
+#             text = request.POST['text']
+#             image_file = request.FILES['image']
+#             image = Image.open(image_file)
 
-            if image.mode != 'RGBA':
-                image = image.convert('RGBA')
+#             if image.mode != 'RGBA':
+#                 image = image.convert('RGBA')
 
-            new_image = hide_text_image(image, text)
+#             new_image = hide_text_image(image, text)
 
-            filename = 'new_' + os.path.splitext(image_file.name)[0] + '.png'
-            # Save inside 'encrypted_images' folder under MEDIA_ROOT
-            save_dir = os.path.join(settings.MEDIA_ROOT, 'encrypted_images')
-            os.makedirs(save_dir, exist_ok=True)
-            image_path = os.path.join(save_dir, filename)
+#             filename = 'new_' + os.path.splitext(image_file.name)[0] + '.png'
+#             # Save inside 'encrypted_images' folder under MEDIA_ROOT
+#             save_dir = os.path.join(settings.MEDIA_ROOT, 'encrypted_images')
+#             os.makedirs(save_dir, exist_ok=True)
+#             image_path = os.path.join(save_dir, filename)
 
-            new_image.save(image_path, format='PNG')
+#             new_image.save(image_path, format='PNG')
 
-            message = "Text has been encrypted in the image."
-            saved_filename = f'encrypted_images/{filename}'  # relative to MEDIA_ROOT
+#             message = "Text has been encrypted in the image."
+#             saved_filename = f'encrypted_images/{filename}'  # relative to MEDIA_ROOT
 
-        except OSError as e:
-            error = f"Image processing error: {str(e)}"
-        except Exception as e:
-            error = f"An unexpected error occurred: {str(e)}"
+#         except OSError as e:
+#             error = f"Image processing error: {str(e)}"
+#         except Exception as e:
+#             error = f"An unexpected error occurred: {str(e)}"
 
-    context = {
-        'message': message,
-        'error': error,
-        'stego_image': saved_filename,  # pass filename for display & download
-        'MEDIA_URL': settings.MEDIA_URL,
-    }
-    return render(request, 'encryption/encryption.html', context)
+#     context = {
+#         'message': message,
+#         'error': error,
+#         'stego_image': saved_filename,  # pass filename for display & download
+#         'MEDIA_URL': settings.MEDIA_URL,
+#     }
+#     return render(request, 'encryption/encryption.html', context)
 
 
 
@@ -251,3 +251,124 @@ def generate_qr_text(request):
 
     return render(request, "qrapp/generate_qr.html", {"qr_img_base64": qr_img_base64, "qr_text": qr_text})
 
+
+
+#Email Configuration
+import os
+from django.shortcuts import render
+from django.conf import settings
+from django.core.mail import EmailMessage
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
+from PIL import Image
+import logging
+
+# Set up logging
+logger = logging.getLogger(__name__)
+
+def encryption_view(request):
+    message = ""
+    error = ""
+    saved_filename = None
+
+    if request.method == "POST":
+        try:
+            text = request.POST['text']
+            image_file = request.FILES['image']
+            recipient_email = request.POST.get('email', '').strip()  # Get email from form
+            
+            # Validate email
+            if not recipient_email:
+                error = "Please provide an email address to send the encrypted image."
+                return render(request, 'encryption/encryption.html', {
+                    'error': error,
+                    'MEDIA_URL': settings.MEDIA_URL,
+                })
+
+            image = Image.open(image_file)
+
+            if image.mode != 'RGBA':
+                image = image.convert('RGBA')
+
+            new_image = hide_text_image(image, text)
+
+            filename = 'new_' + os.path.splitext(image_file.name)[0] + '.png'
+            # Save inside 'encrypted_images' folder under MEDIA_ROOT
+            save_dir = os.path.join(settings.MEDIA_ROOT, 'encrypted_images')
+            os.makedirs(save_dir, exist_ok=True)
+            image_path = os.path.join(save_dir, filename)
+
+            new_image.save(image_path, format='PNG')
+            saved_filename = f'encrypted_images/{filename}'
+
+            # Send email with encrypted image
+            try:
+                send_encrypted_image_email(
+                    recipient_email=recipient_email,
+                    image_path=image_path,
+                    filename=filename,
+                    original_filename=image_file.name
+                )
+                message = f"Text has been successfully encrypted in the image and sent to {recipient_email}."
+                
+            except Exception as email_error:
+                logger.error(f"Email sending failed: {str(email_error)}")
+                message = "Text has been encrypted in the image, but failed to send email. You can download the image below."
+                error = f"Email sending failed: {str(email_error)}"
+
+        except OSError as e:
+            error = f"Image processing error: {str(e)}"
+            logger.error(f"Image processing error: {str(e)}")
+        except Exception as e:
+            error = f"An unexpected error occurred: {str(e)}"
+            logger.error(f"Unexpected error: {str(e)}")
+
+    context = {
+        'message': message,
+        'error': error,
+        'stego_image': saved_filename,
+        'MEDIA_URL': settings.MEDIA_URL,
+    }
+    return render(request, 'encryption/encryption.html', context)
+
+
+def send_encrypted_image_email(recipient_email, image_path, filename, original_filename):
+    """
+    Send encrypted image via email
+    """
+    try:
+        # Email subject and content
+        subject = "Your Encrypted Image - Steganography Service"
+        
+        # Create HTML email content
+        html_content = render_to_string('encryption/email_template.html', {
+            'original_filename': original_filename,
+            'encrypted_filename': filename,
+        })
+        
+        # Create plain text version
+        text_content = strip_tags(html_content)
+        
+        # Create email message
+        email = EmailMessage(
+            subject=subject,
+            body=html_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[recipient_email],
+        )
+        
+        # Set email content type to HTML
+        email.content_subtype = 'html'
+        
+        # Attach the encrypted image
+        with open(image_path, 'rb') as f:
+            email.attach(filename, f.read(), 'image/png')
+        
+        # Send the email
+        email.send()
+        
+        logger.info(f"Encrypted image sent successfully to {recipient_email}")
+        
+    except Exception as e:
+        logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
+        raise e

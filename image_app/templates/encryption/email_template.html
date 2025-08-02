@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Encrypted Image</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .container {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 15px;
+            padding: 30px;
+            color: white;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        .content {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .info-box {
+            background: rgba(255,255,255,0.15);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #4CAF50;
+        }
+        .warning-box {
+            background: rgba(255,193,7,0.2);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+            border-left: 4px solid #FFC107;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        .icon {
+            display: inline-block;
+            margin-right: 8px;
+        }
+        ul {
+            padding-left: 20px;
+        }
+        li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Your Encrypted Image is Ready!</h1>
+            <p>Your message has been successfully hidden using steganography</p>
+        </div>
+
+        <div class="content">
+            <div class="info-box">
+                <h3><span class="icon">📷</span>Image Details:</h3>
+                <p><strong>Original Image:</strong> {{ original_filename }}</p>
+                <p><strong>Encrypted Image:</strong> {{ encrypted_filename }}</p>
+                <p><strong>Encryption Method:</strong> LSB Steganography</p>
+            </div>
+
+            <div class="warning-box">
+                <h3><span class="icon">⚠️</span>Important Security Notes:</h3>
+                <ul>
+                    <li>Your secret message is now invisible within the image pixels</li>
+                    <li>The image appears normal but contains your hidden data</li>
+                    <li>Keep this encrypted image safe and secure</li>
+                    <li>Only someone with the decryption tool can reveal your message</li>
+                </ul>
+            </div>
+
+            <div class="info-box">
+                <h3><span class="icon">📋</span>Next Steps:</h3>
+                <ul>
+                    <li>Download the attached encrypted image</li>
+                    <li>Share it safely with your intended recipient</li>
+                    <li>Use our decryption service to reveal the hidden message</li>
+                    <li>Delete this email after downloading for security</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>🔒 This email contains your encrypted image as an attachment.</p>
+            <p>If you didn't request this encryption, please ignore this email.</p>
+            <hr style="border: none; border-top: 1px solid rgba(255,255,255,0.3); margin: 20px 0;">
+            <p><small>Steganography Service - Secure • Private • Invisible</small></p>
+        </div>
+    </div>
+</body>
+</html>
