@@ -162,58 +162,58 @@ def extract_text_from_image(image):
 
 
 # QR code Main Flex
-from django.shortcuts import render
-from .forms import GenerateQRForm, DecryptForm
-from cryptography.fernet import Fernet, InvalidToken
-import base64, qrcode
-from io import BytesIO
+# from django.shortcuts import render
+# from .forms import GenerateQRForm, DecryptForm
+# from cryptography.fernet import Fernet, InvalidToken
+# import base64, qrcode
+# from io import BytesIO
 
 
-def pad_password(password):
-    return base64.urlsafe_b64encode(password.ljust(32)[:32].encode())
+# def pad_password(password):
+#     return base64.urlsafe_b64encode(password.ljust(32)[:32].encode())
 
 
-@login_required(login_url='/login')
-def generate_qr(request):
-    qr_img = None
-    if request.method == 'POST':
-        form = GenerateQRForm(request.POST)
-        if form.is_valid():
-            text = form.cleaned_data['text']
-            password = form.cleaned_data['password']
-            key = pad_password(password)
-            fernet = Fernet(key)
-            token = fernet.encrypt(text.encode())
+# @login_required(login_url='/login')
+# def generate_qr(request):
+#     qr_img = None
+#     if request.method == 'POST':
+#         form = GenerateQRForm(request.POST)
+#         if form.is_valid():
+#             text = form.cleaned_data['text']
+#             password = form.cleaned_data['password']
+#             key = pad_password(password)
+#             fernet = Fernet(key)
+#             token = fernet.encrypt(text.encode())
 
-            # Create QR
-            qr = qrcode.make(token.decode())
-            buffer = BytesIO()
-            qr.save(buffer, format='PNG')
-            img_str = base64.b64encode(buffer.getvalue()).decode()
-            qr_img = f'data:image/png;base64,{img_str}'
-    else:
-        form = GenerateQRForm()
-    return render(request, 'qrapp/generate.html', {'form': form, 'qr_img': qr_img})
+#             # Create QR
+#             qr = qrcode.make(token.decode())
+#             buffer = BytesIO()
+#             qr.save(buffer, format='PNG')
+#             img_str = base64.b64encode(buffer.getvalue()).decode()
+#             qr_img = f'data:image/png;base64,{img_str}'
+#     else:
+#         form = GenerateQRForm()
+#     return render(request, 'qrapp/generate.html', {'form': form, 'qr_img': qr_img})
 
 
-@login_required(login_url='/login')
-def decrypt(request):
-    text = error = None
-    token_val = ''
-    if request.method == 'POST':
-        form = DecryptForm(request.POST)
-        if form.is_valid():
-            token_val = form.cleaned_data['token']
-            password = form.cleaned_data['password']
-            try:
-                key = pad_password(password)
-                fernet = Fernet(key)
-                text = fernet.decrypt(token_val.encode()).decode()
-            except InvalidToken:
-                error = "Incorrect password or invalid data."
-    else:
-        form = DecryptForm()
-    return render(request, 'qrapp/decrypt.html', {'form': form, 'text': text, 'error': error})
+# @login_required(login_url='/login')
+# def decrypt(request):
+#     text = error = None
+#     token_val = ''
+#     if request.method == 'POST':
+#         form = DecryptForm(request.POST)
+#         if form.is_valid():
+#             token_val = form.cleaned_data['token']
+#             password = form.cleaned_data['password']
+#             try:
+#                 key = pad_password(password)
+#                 fernet = Fernet(key)
+#                 text = fernet.decrypt(token_val.encode()).decode()
+#             except InvalidToken:
+#                 error = "Incorrect password or invalid data."
+#     else:
+#         form = DecryptForm()
+#     return render(request, 'qrapp/decrypt.html', {'form': form, 'text': text, 'error': error})
 
 
 
@@ -372,3 +372,121 @@ def send_encrypted_image_email(recipient_email, image_path, filename, original_f
     except Exception as e:
         logger.error(f"Failed to send email to {recipient_email}: {str(e)}")
         raise e
+    
+
+
+#Main Flex
+from django.shortcuts import render
+from .forms import GenerateQRForm, DecryptForm
+from cryptography.fernet import Fernet, InvalidToken
+import base64, qrcode
+from io import BytesIO
+
+def pad_password(password):
+    return base64.urlsafe_b64encode(password.ljust(32)[:32].encode())
+
+@login_required(login_url='/login')
+def generate_qr(request):
+    qr_img = None
+    email_sent = False
+    email_error = None
+    
+    if request.method == 'POST':
+        form = GenerateQRForm(request.POST)
+        if form.is_valid():
+            text = form.cleaned_data['text']
+            password = form.cleaned_data['password']
+            recipient_email = form.cleaned_data.get('email', '').strip()
+            
+            key = pad_password(password)
+            fernet = Fernet(key)
+            token = fernet.encrypt(text.encode())
+
+            # Create QR
+            qr = qrcode.make(token.decode())
+            buffer = BytesIO()
+            qr.save(buffer, format='PNG')
+            img_str = base64.b64encode(buffer.getvalue()).decode()
+            qr_img = f'data:image/png;base64,{img_str}'
+            
+            # Send email if email address is provided
+            if recipient_email:
+                try:
+                    send_qr_code_email(
+                        recipient_email=recipient_email,
+                        qr_image_data=buffer.getvalue(),
+                        encrypted_text_preview=text[:50] + "..." if len(text) > 50 else text
+                    )
+                    email_sent = True
+                    messages.success(request, f"QR code has been generated and sent to {recipient_email}")
+                except Exception as e:
+                    email_error = f"Failed to send email: {str(e)}"
+                    logger.error(f"QR email sending failed: {str(e)}")
+                    messages.warning(request, "QR code generated successfully, but email sending failed.")
+    else:
+        form = GenerateQRForm()
+    
+    return render(request, 'qrapp/generate.html', {
+        'form': form, 
+        'qr_img': qr_img,
+        'email_sent': email_sent,
+        'email_error': email_error
+    })
+
+def send_qr_code_email(recipient_email, qr_image_data, encrypted_text_preview):
+    """
+    Send QR code via email
+    """
+    try:
+        # Email subject and content
+        subject = "Your Encrypted QR Code - Inkognito"
+
+        # Create HTML email content
+        html_content = render_to_string('qrapp/qr_email_template.html', {
+            'encrypted_text_preview': encrypted_text_preview,
+        })
+        
+        # Create plain text version
+        text_content = strip_tags(html_content)
+        
+        # Create email message
+        email = EmailMessage(
+            subject=subject,
+            body=html_content,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            to=[recipient_email],
+        )
+        
+        # Set email content type to HTML
+        email.content_subtype = 'html'
+        
+        # Attach the QR code image
+        email.attach('encrypted_qr_code.png', qr_image_data, 'image/png')
+        
+        # Send the email
+        email.send()
+        
+        logger.info(f"QR code sent successfully to {recipient_email}")
+        
+    except Exception as e:
+        logger.error(f"Failed to send QR email to {recipient_email}: {str(e)}")
+        raise e
+
+@login_required(login_url='/login')
+def decrypt(request):
+    text = error = None
+    token_val = ''
+    if request.method == 'POST':
+        form = DecryptForm(request.POST)
+        if form.is_valid():
+            token_val = form.cleaned_data['token']
+            password = form.cleaned_data['password']
+            try:
+                key = pad_password(password)
+                fernet = Fernet(key)
+                text = fernet.decrypt(token_val.encode()).decode()
+            except InvalidToken:
+                error = "Incorrect password or invalid data."
+    else:
+        form = DecryptForm()
+    return render(request, 'qrapp/decrypt.html', {'form': form, 'text': text, 'error': error})

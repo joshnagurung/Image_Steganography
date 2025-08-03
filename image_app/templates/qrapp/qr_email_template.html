@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Encrypted QR Code</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: 300;
+        }
+        .header .subtitle {
+            margin: 10px 0 0 0;
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 30px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+        .qr-section h3 {
+            color: #495057;
+            margin-bottom: 15px;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .info-box h4 {
+            margin: 0 0 10px 0;
+            color: #1976d2;
+        }
+        .warning-box {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .warning-box h4 {
+            margin: 0 0 10px 0;
+            color: #f57c00;
+        }
+        .footer {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #dee2e6;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: 500;
+            margin: 10px 0;
+        }
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        .feature-list li {
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .feature-list li:before {
+            content: "✓";
+            color: #28a745;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔐 Your Encrypted QR Code</h1>
+            <p class="subtitle">Secure • Encrypted • Ready to Use</p>
+        </div>
+        
+        <div class="content">
+            <p>Hello!</p>
+            
+            <p>Your encrypted QR code has been successfully generated using military-grade AES-256 encryption. The QR code is attached to this email as a PNG image.</p>
+            
+            <div class="info-box">
+                <h4>📄 Encrypted Content Preview:</h4>
+                <p><strong>{{ encrypted_text_preview }}</strong></p>
+            </div>
+            
+            <div class="qr-section">
+                <h3>📱 QR Code Attached</h3>
+                <p>Your encrypted QR code is attached as <strong>encrypted_qr_code.png</strong></p>
+                <p>Download and save it securely!</p>
+            </div>
+            
+            <div class="info-box">
+                <h4>🛡️ Security Features:</h4>
+                <ul class="feature-list">
+                    <li>AES-256 Military-Grade Encryption</li>
+                    <li>Password-Protected Access</li>
+                    <li>High-Resolution PNG Format</li>
+                    <li>Error Correction Level L</li>
+                    <li>Mobile-Friendly Scanning</li>
+                </ul>
+            </div>
+            
+            <div class="warning-box">
+                <h4>⚠️ Important Security Notice</h4>
+                <p><strong>Remember your encryption password!</strong> Without it, the QR code data cannot be decrypted. We don't store your passwords or data for security reasons.</p>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p>Need to decrypt another QR code?</p>
+                <a href="#" class="btn">🔓 Decrypt QR Code</a>
+            </div>
+            
+            <h4>📋 How to Use Your QR Code:</h4>
+            <ol>
+                <li><strong>Download</strong> the attached PNG image</li>
+                <li><strong>Share</strong> the QR code with intended recipients</li>
+                <li><strong>Scan</strong> using any QR code scanner app</li>
+                <li><strong>Decrypt</strong> using your password on our platform</li>
+            </ol>
+            
+            <div class="info-box">
+                <h4>📱 Supported Devices:</h4>
+                <p>This QR code works with all standard QR code scanner apps on iOS, Android, and desktop devices. The encrypted token can be decrypted on our secure platform.</p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p><strong>Inkognito - Secure Data Solutions</strong></p>
+            <p>This email was sent because you requested an encrypted QR code generation.</p>
+            <p>For support, please contact us or visit our help center.</p>
+            <p style="margin-top: 15px; font-size: 12px; opacity: 0.7;">
+                Generated with ❤️ using advanced cryptography • AES-256 Encryption
+            </p>
+        </div>
+    </div>
+</body>
+</html>
